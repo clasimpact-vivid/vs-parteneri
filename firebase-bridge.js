@@ -155,5 +155,9 @@ onAuthStateChanged(auth, async u => {
     usersReady = true; usersListeners.forEach(fn => fn(usersMap));
   }, e => console.warn('users', e));
   login.hidden = true; document.body.classList.remove('locked');
-  if (!started) { started = true; window.__vsBridge.user(user); window.__vsBridge.db(db); }
+  if (!started) { started = true; window.__vsBridge.user(user); window.__vsBridge.db(db);
+    // prezență: „online” cât timp aplicația e deschisă și vizibilă
+    const beat = () => { if (document.visibilityState === 'visible' && auth.currentUser) updateDoc(doc(fs, 'users', auth.currentUser.uid), { lastSeen: serverTimestamp() }).catch(() => {}); };
+    beat(); setInterval(beat, 60000); document.addEventListener('visibilitychange', beat);
+  }
 });

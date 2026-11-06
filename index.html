@@ -48,7 +48,15 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .side button.nv:focus-visible{outline:2px solid var(--side-gold);outline-offset:-2px}
 .side .bdg{margin-left:auto;font-size:11px;padding:1px 7px;border-radius:999px;background:var(--side2);color:var(--side-mut)}
 .side .bdg.hot{background:#b4413a;color:#fff}
-.who{margin-top:auto;display:flex;gap:9px;align-items:center;padding:12px 8px 0;border-top:1px solid var(--side-line);font-size:12.5px;color:var(--side-mut)}
+.pres{margin-top:auto;padding:10px 8px 10px;border-top:1px solid var(--side-line);font-size:12.5px;color:var(--side-mut)}
+.pres .ph{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;margin-bottom:6px}
+.pres .pu{display:flex;align-items:center;gap:8px;padding:3px 0}
+.pres .pu b{font-weight:500;color:var(--side-fg)}
+.pres .pu span{margin-left:auto;font-size:11.5px}
+.pres .dot{width:8px;height:8px;border-radius:50%;background:#5a554c;flex-shrink:0}
+.pres .dot.on{background:#4caf6a;box-shadow:0 0 0 3px rgba(76,175,106,.18)}
+.pres:empty{display:none}
+.who{display:flex;gap:9px;align-items:center;padding:12px 8px 0;border-top:1px solid var(--side-line);font-size:12.5px;color:var(--side-mut)}
 .who img{width:28px;height:28px;border-radius:50%}
 .who b{display:block;color:var(--side-fg);font-weight:500}
 .mainc{flex:1;min-width:0;display:flex;flex-direction:column}
@@ -250,6 +258,7 @@ body.locked .app{display:none}
   <aside class="side" id="side">
     <div class="logo"><div class="mk">VS</div><div class="tx">Vivid Senses<small>Parteneri</small></div></div>
     <nav id="nav" aria-label="Secțiuni"></nav>
+    <div class="pres" id="pres"></div>
     <div class="who" id="who"></div>
   </aside>
   <div class="sback" id="sback"></div>
@@ -267,7 +276,7 @@ body.locked .app{display:none}
 <div id="ovroot"></div>
 
 <div id="print"></div>
-<script src="config.js?v=20261106e"></script>
+<script src="config.js?v=20261106f"></script>
 <script>window.__vsBridge={};(function(){var p={};['user','db'].forEach(function(k){p[k]=new Promise(function(r){window.__vsBridge[k]=r;});});window.claude={use:function(n){return p[n]||Promise.resolve(null);}};})();</script>
 <script>
 (() => {
@@ -317,7 +326,16 @@ const TABS=[['g','Vânzare'],['panou','Panou'],['clienti','Clienți'],['mostre',
 const TITLES={panou:'Panou',clienti:'Clienți',mostre:'Mostre și follow-up',vanzari:'Vânzări',produse:'Produse & prețuri',stoc:'Stoc',rapoarte:'Rapoarte',jurnal:'Jurnal',setari:'Setări'};
 let q='';const match=(...xs)=>!q||xs.join(' ').toLowerCase().includes(q.toLowerCase());
 function go(k){tab=k;try{localStorage.setItem('vsp-tab',k);}catch(e){}$('#side').classList.remove('open');$('#sback').classList.remove('open');renderNav();render();window.scrollTo(0,0);}
-function renderNav(){const due=fuDue().length;const badge={clienti:Object.keys(S.clients).length||null,mostre:due?[due,'hot']:null};$('#nav').replaceChildren(...TABS.filter(([k])=>k!=='jurnal'||isAdmin).map(([k,l])=>k==='g'?h('div',{class:'sgrp'},l):h('button',{class:'nv','aria-current':tab===k?'page':null,onclick:()=>go(k)},h('span',{html:'<svg viewBox="0 0 24 24"><path d="'+IC[k]+'"/></svg>'}),l,badge[k]?h('span',{class:'bdg'+(Array.isArray(badge[k])?' hot':'')},Array.isArray(badge[k])?badge[k][0]:badge[k]):null)));$('#tt').textContent=TITLES[tab]||'Panou';const nb=$('#newb');const act={panou:['+ Vânzare',()=>saleModal()],clienti:['+ Client nou',()=>clientModal()],mostre:['+ Mostră',()=>sampleModal()],vanzari:['+ Vânzare',()=>saleModal()],produse:isAdmin?['+ Produs',()=>prodModal()]:null,stoc:['+ Intrare marfă',()=>moveModal()]}[tab];nb.hidden=!act;if(act){nb.textContent=act[0];nb.onclick=act[1];}const ex={vanzari:[['Excel',exportVanzari],['Decont PDF',printDecont]],clienti:[['Excel',exportClienti]],stoc:[['Excel',exportStoc]]}[tab]||[];$('#exps').replaceChildren(...ex.map(([l,f])=>h('button',{class:'b',onclick:f},l)));}
+const ONLINE_MS=150000;let presOn=null,presStarted=false;
+function seenMs(u){const t=u&&u.lastSeen;return t&&t.toMillis?t.toMillis():t&&t.seconds?t.seconds*1000:0;}
+function isOnline(u){return Date.now()-seenMs(u)<ONLINE_MS;}
+function relSeen(u){const ms=seenMs(u);if(!ms)return 'niciodată';if(isOnline(u))return 'online';const m=Math.round((Date.now()-ms)/60000);if(m<60)return 'acum '+m+' min';const hh=Math.round(m/60);if(hh<24)return 'acum '+hh+' h';const d=new Date(ms);return d.toLocaleDateString('ro-RO',{day:'numeric',month:'short'})+', '+d.toLocaleTimeString('ro-RO',{hour:'2-digit',minute:'2-digit'});}
+function renderPresence(){const el=$('#pres');if(!el||!window.VSAdmin||!me.id)return;const us=Object.values(VSAdmin.users()).filter(u=>u.id!==me.id&&u.active!==false).sort((a,b)=>(isOnline(b)-isOnline(a))||(a.name||'').localeCompare(b.name||'','ro'));
+const on=new Set(us.filter(isOnline).map(u=>u.id));
+if(presOn&&isAdmin){us.filter(u=>on.has(u.id)&&!presOn.has(u.id)).forEach(u=>{toast((u.name||u.email)+' a intrat în aplicație');try{if(window.Notification&&Notification.permission==='granted'&&document.visibilityState!=='visible')new Notification('Vivid Senses Parteneri',{body:(u.name||u.email)+' a intrat în aplicație'});}catch(e){}});}
+presOn=on;el.replaceChildren(...(us.length?[h('div',{class:'ph'},'Echipa'),...us.map(u=>h('div',{class:'pu',title:u.email||''},h('i',{class:'dot'+(on.has(u.id)?' on':'')}),h('b',null,u.name||u.email),h('span',null,relSeen(u))))]:[]));}
+function startPresence(){if(presStarted||!window.VSAdmin||!me.id)return;presStarted=true;VSAdmin.onUsers(()=>renderPresence());setInterval(renderPresence,30000);renderPresence();}
+function renderNav(){startPresence();const due=fuDue().length;const badge={clienti:Object.keys(S.clients).length||null,mostre:due?[due,'hot']:null};$('#nav').replaceChildren(...TABS.filter(([k])=>k!=='jurnal'||isAdmin).map(([k,l])=>k==='g'?h('div',{class:'sgrp'},l):h('button',{class:'nv','aria-current':tab===k?'page':null,onclick:()=>go(k)},h('span',{html:'<svg viewBox="0 0 24 24"><path d="'+IC[k]+'"/></svg>'}),l,badge[k]?h('span',{class:'bdg'+(Array.isArray(badge[k])?' hot':'')},Array.isArray(badge[k])?badge[k][0]:badge[k]):null)));$('#tt').textContent=TITLES[tab]||'Panou';const nb=$('#newb');const act={panou:['+ Vânzare',()=>saleModal()],clienti:['+ Client nou',()=>clientModal()],mostre:['+ Mostră',()=>sampleModal()],vanzari:['+ Vânzare',()=>saleModal()],produse:isAdmin?['+ Produs',()=>prodModal()]:null,stoc:['+ Intrare marfă',()=>moveModal()]}[tab];nb.hidden=!act;if(act){nb.textContent=act[0];nb.onclick=act[1];}const ex={vanzari:[['Excel',exportVanzari],['Decont PDF',printDecont]],clienti:[['Excel',exportClienti]],stoc:[['Excel',exportStoc]]}[tab]||[];$('#exps').replaceChildren(...ex.map(([l,f])=>h('button',{class:'b',onclick:f},l)));}
 function monthPicker(){return h('label',{class:'f',style:'max-width:180px'},'Luna',h('input',{type:'month',id:'month',value:month,onchange:e=>{month=e.target.value;render();}}));}
 let rq=false;function render(){if(rq)return;rq=true;requestAnimationFrame(()=>{rq=false;renderNav();const m=$('#main');const f={panou:vPanou,produse:vProduse,stoc:vStoc,vanzari:vVanzari,clienti:vClienti,mostre:vMostre,rapoarte:vRapoarte,jurnal:vJurnal,setari:vSetari}[tab]||vPanou;m.replaceChildren(...[].concat(f()).filter(x=>x!=null&&x!==false));m.querySelectorAll('.tw table').forEach(t=>{const hs=[...t.querySelectorAll('thead th')].map(th=>th.textContent.trim());t.querySelectorAll('tbody tr').forEach(tr=>[...tr.children].forEach((td,i)=>td.setAttribute('data-label',hs[i]||'')));});});}
 $('#ham').onclick=()=>{$('#side').classList.add('open');$('#sback').classList.add('open');};$('#sback').onclick=()=>{$('#side').classList.remove('open');$('#sback').classList.remove('open');};
@@ -502,12 +520,12 @@ h('label',{class:'row',style:'font-size:13.5px;margin-top:8px'},nt,'Primesc rezu
 h('div',{class:'row',style:'margin-top:10px;align-items:end'},h('label',{class:'f',style:'flex:1;min-width:200px'},'Parolă nouă',p1),
 h('button',{class:'b',onclick:async()=>{if(p1.value.length<8){toast('Parola trebuie să aibă cel puțin 8 caractere.');return;}try{await VSAdmin.changePassword(p1.value);p1.value='';toast('Parola a fost schimbată');}catch(e){toast(e&&e.code==='auth/requires-recent-login'?'Ieși din cont, intră din nou și reîncearcă.':'Parola nu s-a schimbat.');}}},'Schimbă parola'),
 h('button',{class:'b',onclick:()=>guard(()=>db.doc('users/'+me.id).update({notify:nt.checked}),'Salvat')},'Salvează notificările')),
-h('div',{class:'row',style:'margin-top:12px'},h('button',{class:'b danger',onclick:()=>VSAdmin.logout()},'Ieși din cont')));}
+h('div',{class:'row',style:'margin-top:12px'},isAdmin&&window.Notification&&Notification.permission!=='granted'?h('button',{class:'b',onclick:async()=>{const r=await Notification.requestPermission();toast(r==='granted'?'Gata: primești notificare când intră cineva, chiar dacă tab-ul e în fundal.':'Browserul a refuzat notificările.');render();}},'Notificări în browser când intră cineva'):null,h('button',{class:'b danger',onclick:()=>VSAdmin.logout()},'Ieși din cont')));}
 function vUtilizatori(){if(!isAdmin)return null;if(!usersUnsub&&window.VSAdmin){usersUnsub=VSAdmin.onUsers(m=>{usersSnap=Object.values(m);render();});}
 const nm=h('input',{id:'u-n',placeholder:'Nume'}),em=h('input',{id:'u-e',type:'email',placeholder:'email@exemplu.ro'}),pw=h('input',{id:'u-p',type:'text',placeholder:'parolă temporară, min. 8'}),rl=h('select',{id:'u-r'},h('option',{value:'partner'},'Partener'),h('option',{value:'admin'},'Administrator'));
 const list=(usersSnap||[]).sort((a,b)=>(a.name||'').localeCompare(b.name||'','ro'));
 return h('div',{class:'panel'},h('h2',null,'Utilizatori'),h('p',{class:'note'},'Partenerul adaugă și modifică, dar nu poate șterge nimic și nu vede eMAG, setările de editat sau jurnalul.'),
-list.length?h('div',{class:'tw',style:'margin-top:10px'},h('table',null,h('thead',null,h('tr',null,['Nume','Email','Rol','Activ','Email zilnic',''].map(x=>h('th',null,x)))),h('tbody',null,list.map(u=>{const self=u.id===me.id;return h('tr',null,h('td',null,u.name||'–',u.mustChange===true?h('span',{class:'pill',style:'margin-left:6px',title:'Nu a intrat încă și nu și-a ales parola'},'parolă temporară'):null),h('td',null,u.email||'–'),h('td',null,h('select',{'aria-label':'Rol',disabled:self,onchange:e=>guard(()=>VSAdmin.setUser(u.id,{role:e.target.value}),'Rol schimbat')},[['partner','Partener'],['admin','Administrator']].map(([v,l])=>h('option',{value:v,selected:u.role===v},l)))),h('td',null,h('input',{type:'checkbox','aria-label':'Activ',checked:u.active!==false,disabled:self,style:'width:auto',onchange:e=>guard(()=>VSAdmin.setUser(u.id,{active:e.target.checked}),e.target.checked?'Cont activat':'Cont dezactivat')})),h('td',null,h('input',{type:'checkbox','aria-label':'Email zilnic',checked:u.notify!==false,style:'width:auto',onchange:e=>guard(()=>VSAdmin.setUser(u.id,{notify:e.target.checked}),'Salvat')})),h('td',null,h('button',{class:'b sm',onclick:()=>VSAdmin.resetPassword(u.email).then(()=>toast('Link de resetare trimis la '+u.email)).catch(()=>toast('Nu s-a putut trimite.'))},'Resetează parola')));})))):h('p',{class:'note'},'Se încarcă…'),
+list.length?h('div',{class:'tw',style:'margin-top:10px'},h('table',null,h('thead',null,h('tr',null,['Nume','Email','Văzut','Rol','Activ','Email zilnic',''].map(x=>h('th',null,x)))),h('tbody',null,list.map(u=>{const self=u.id===me.id;return h('tr',null,h('td',null,u.name||'–',u.mustChange===true?h('span',{class:'pill',style:'margin-left:6px',title:'Nu a intrat încă și nu și-a ales parola'},'parolă temporară'):null),h('td',null,u.email||'–'),h('td',null,self?'acum':h('span',{class:isOnline(u)?'pill good':''},relSeen(u))),h('td',null,h('select',{'aria-label':'Rol',disabled:self,onchange:e=>guard(()=>VSAdmin.setUser(u.id,{role:e.target.value}),'Rol schimbat')},[['partner','Partener'],['admin','Administrator']].map(([v,l])=>h('option',{value:v,selected:u.role===v},l)))),h('td',null,h('input',{type:'checkbox','aria-label':'Activ',checked:u.active!==false,disabled:self,style:'width:auto',onchange:e=>guard(()=>VSAdmin.setUser(u.id,{active:e.target.checked}),e.target.checked?'Cont activat':'Cont dezactivat')})),h('td',null,h('input',{type:'checkbox','aria-label':'Email zilnic',checked:u.notify!==false,style:'width:auto',onchange:e=>guard(()=>VSAdmin.setUser(u.id,{notify:e.target.checked}),'Salvat')})),h('td',null,h('button',{class:'b sm',onclick:()=>VSAdmin.resetPassword(u.email).then(()=>toast('Link de resetare trimis la '+u.email)).catch(()=>toast('Nu s-a putut trimite.'))},'Resetează parola')));})))):h('p',{class:'note'},'Se încarcă…'),
 h('h2',{style:'margin-top:16px;font-size:16px'},'Adaugă un utilizator'),h('div',{class:'fgrid',style:'margin-top:8px'},h('label',{class:'f'},'Nume',nm),h('label',{class:'f'},'Email',em),h('label',{class:'f'},'Parolă temporară',pw),h('label',{class:'f'},'Rol',rl)),
 h('div',{class:'row',style:'margin-top:10px'},h('button',{class:'b pri',onclick:async e=>{if(!nm.value.trim()||!em.value.trim()||pw.value.length<8){toast('Completează numele, emailul și o parolă de minimum 8 caractere.');return;}e.target.disabled=true;try{await VSAdmin.createUser({name:nm.value.trim(),email:em.value.trim(),password:pw.value,role:rl.value});toast('Cont creat. Trimite-i emailul și parola temporară; la prima intrare va fi obligat să și-o schimbe.');nm.value=em.value=pw.value='';}catch(err){toast(err&&err.code==='auth/email-already-in-use'?'Există deja un cont cu acest email.':'Contul nu s-a creat.');}finally{e.target.disabled=false;}}},'Creează contul')));}
 
@@ -552,6 +570,6 @@ renderNav();
 })();
 })();
 </script>
-<script type="module" src="firebase-bridge.js?v=20261106e"></script>
+<script type="module" src="firebase-bridge.js?v=20261106f"></script>
 </body>
 </html>
