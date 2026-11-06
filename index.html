@@ -67,7 +67,7 @@ main{width:100%;max-width:1280px;margin:0 auto;padding-block:22px 60px;padding-l
   .sback.open{display:block;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:14}
   .ham{display:inline-flex}
   .srch{width:auto;flex:1}
-  .top .tt{font-size:18px}
+  #tt{font-size:18px}
   main{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 }
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
@@ -199,6 +199,29 @@ body.locked .app{display:none}
   #print .sig div{width:45%;border-top:.5pt solid #000;padding-top:4pt}
 }
 @media (max-width:860px){#exps{display:none!important}}
+/* ---- Telefon ---- */
+@media (max-width:860px){
+  .top{flex-wrap:wrap;row-gap:10px}
+  #tt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .srch{order:5;flex:1 1 100%;width:100%;margin-left:0}
+  main > .row.between > button.b.pri, main > .row.between > .row > button.b.pri{display:none}
+  main > .row.between > div:first-child{flex:1 1 100%}
+}
+@media (max-width:640px){
+  main .tw{border:0;background:none;overflow:visible;border-radius:0}
+  main .tw table, main .tw tbody, main .tw tr, main .tw td{display:block;width:100%}
+  main .tw thead{display:none}
+  main .tw tbody tr{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin-bottom:10px;padding:4px 14px}
+  main .tw td{display:flex;justify-content:space-between;align-items:center;gap:14px;border-bottom:1px solid var(--line);padding:9px 0;white-space:normal;text-align:right;min-width:0}
+  main .tw td:last-child{border-bottom:0}
+  main .tw td:empty{display:none}
+  main .tw td::before{content:attr(data-label);color:var(--muted);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;text-align:left;flex-shrink:0;max-width:42%}
+  main .tw td:first-child{font-weight:600;font-size:15px;text-align:left;justify-content:flex-start}
+  main .tw td:first-child::before{display:none}
+  main .tw td > .row{justify-content:flex-end}
+  .fbar select{flex:1 1 140px;min-width:0}
+}
+
 </style>
 </head>
 <body class="locked">
@@ -287,7 +310,7 @@ let q='';const match=(...xs)=>!q||xs.join(' ').toLowerCase().includes(q.toLowerC
 function go(k){tab=k;try{localStorage.setItem('vsp-tab',k);}catch(e){}$('#side').classList.remove('open');$('#sback').classList.remove('open');renderNav();render();window.scrollTo(0,0);}
 function renderNav(){const due=fuDue().length;const badge={clienti:Object.keys(S.clients).length||null,mostre:due?[due,'hot']:null};$('#nav').replaceChildren(...TABS.filter(([k])=>k!=='jurnal'||isAdmin).map(([k,l])=>k==='g'?h('div',{class:'sgrp'},l):h('button',{class:'nv','aria-current':tab===k?'page':null,onclick:()=>go(k)},h('span',{html:'<svg viewBox="0 0 24 24"><path d="'+IC[k]+'"/></svg>'}),l,badge[k]?h('span',{class:'bdg'+(Array.isArray(badge[k])?' hot':'')},Array.isArray(badge[k])?badge[k][0]:badge[k]):null)));$('#tt').textContent=TITLES[tab]||'Panou';const nb=$('#newb');const act={panou:['+ Vânzare',()=>saleModal()],clienti:['+ Client nou',()=>clientModal()],mostre:['+ Mostră',()=>sampleModal()],vanzari:['+ Vânzare',()=>saleModal()],produse:isAdmin?['+ Produs',()=>prodModal()]:null,stoc:['+ Intrare marfă',()=>moveModal()]}[tab];nb.hidden=!act;if(act){nb.textContent=act[0];nb.onclick=act[1];}const ex={vanzari:[['Excel',exportVanzari],['Decont PDF',printDecont]],clienti:[['Excel',exportClienti]],stoc:[['Excel',exportStoc]]}[tab]||[];$('#exps').replaceChildren(...ex.map(([l,f])=>h('button',{class:'b',onclick:f},l)));}
 function monthPicker(){return h('label',{class:'f',style:'max-width:180px'},'Luna',h('input',{type:'month',id:'month',value:month,onchange:e=>{month=e.target.value;render();}}));}
-let rq=false;function render(){if(rq)return;rq=true;requestAnimationFrame(()=>{rq=false;renderNav();const m=$('#main');const f={panou:vPanou,produse:vProduse,stoc:vStoc,vanzari:vVanzari,clienti:vClienti,mostre:vMostre,rapoarte:vRapoarte,jurnal:vJurnal,setari:vSetari}[tab]||vPanou;m.replaceChildren(...[].concat(f()).filter(x=>x!=null&&x!==false));});}
+let rq=false;function render(){if(rq)return;rq=true;requestAnimationFrame(()=>{rq=false;renderNav();const m=$('#main');const f={panou:vPanou,produse:vProduse,stoc:vStoc,vanzari:vVanzari,clienti:vClienti,mostre:vMostre,rapoarte:vRapoarte,jurnal:vJurnal,setari:vSetari}[tab]||vPanou;m.replaceChildren(...[].concat(f()).filter(x=>x!=null&&x!==false));m.querySelectorAll('.tw table').forEach(t=>{const hs=[...t.querySelectorAll('thead th')].map(th=>th.textContent.trim());t.querySelectorAll('tbody tr').forEach(tr=>[...tr.children].forEach((td,i)=>td.setAttribute('data-label',hs[i]||'')));});});}
 $('#ham').onclick=()=>{$('#side').classList.add('open');$('#sback').classList.add('open');};$('#sback').onclick=()=>{$('#side').classList.remove('open');$('#sback').classList.remove('open');};
 let qt;$('#q').addEventListener('input',e=>{clearTimeout(qt);qt=setTimeout(()=>{q=e.target.value.trim();render();},150);});
 
@@ -379,9 +402,9 @@ function vRapoarte(){const months=[];const d0=new Date();d0.setDate(1);for(let i
 const agg={};for(const m of months)agg[m]={g:0,np:0,p:0};const prod={};const byP={};const byC={};
 for(const s of S.sales){const m=(s.date||'').slice(0,7);const c=saleCalc(s);if(agg[m]){agg[m].g+=c.gross;agg[m].np+=c.np;agg[m].p+=c.partner;}for(const l of s.lines||[]){const p=prod[l.productId]||(prod[l.productId]={q:0,g:0});p.q+=n2(l.qty);p.g+=n2(l.qty)*n2(l.unitPrice);}const w=byP[s.by||'-']||(byP[s.by||'-']={n:0,g:0});w.n++;w.g+=c.gross;if(s.clientId){byC[s.clientId]=(byC[s.clientId]||0)+c.gross;}}
 // grafic: bare vânzări cu TVA + bară profit net, pe 12 luni
-const W=760,H=260,pl=56,pr=10,pt=14,pb=30;const mx=Math.max(1,...months.map(m=>agg[m].g));const nice=v=>{const p=Math.pow(10,Math.floor(Math.log10(v)));const r=v/p;return (r<=1?1:r<=2?2:r<=5?5:10)*p;};const top=nice(mx);const y=v=>pt+(H-pt-pb)*(1-v/top);const bw=(W-pl-pr)/12;
+const sm=window.innerWidth<600;const W=sm?360:760,H=sm?230:260,pl=sm?42:56,pr=6,pt=14,pb=30;const mx=Math.max(1,...months.map(m=>agg[m].g));const nice=v=>{const p=Math.pow(10,Math.floor(Math.log10(v)));const r=v/p;return (r<=1?1:r<=2?2:r<=5?5:10)*p;};const top=nice(mx);const y=v=>pt+(H-pt-pb)*(1-v/top);const bw=(W-pl-pr)/12;
 let svg='<svg class="chart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Vânzări și profit net pe ultimele 12 luni">';for(let i=0;i<=4;i++){const v=top*i/4;svg+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y(v)+'" y2="'+y(v)+'" stroke="var(--line)"/><text x="'+(pl-8)+'" y="'+(y(v)+4)+'" text-anchor="end">'+Math.round(v).toLocaleString('ro-RO')+'</text>';}
-months.forEach((m,i)=>{const x=pl+i*bw;const a=agg[m];const w=bw*0.34;svg+='<rect x="'+(x+bw*0.14)+'" y="'+y(a.g)+'" width="'+w+'" height="'+(y(0)-y(a.g))+'" rx="2" fill="var(--gold)" opacity=".35"><title>'+m+': vânzări '+lei(a.g)+'</title></rect><rect x="'+(x+bw*0.14+w+2)+'" y="'+y(Math.max(0,a.np))+'" width="'+w+'" height="'+(y(0)-y(Math.max(0,a.np)))+'" rx="2" fill="var(--gold)"><title>'+m+': profit net '+lei(a.np)+'</title></rect><text x="'+(x+bw/2)+'" y="'+(H-10)+'" text-anchor="middle">'+new Date(m+'-15').toLocaleDateString('ro-RO',{month:'short'})+'</text>';});svg+='</svg>';
+months.forEach((m,i)=>{const x=pl+i*bw;const a=agg[m];const w=bw*0.34;svg+='<rect x="'+(x+bw*0.14)+'" y="'+y(a.g)+'" width="'+w+'" height="'+(y(0)-y(a.g))+'" rx="2" fill="var(--gold)" opacity=".35"><title>'+m+': vânzări '+lei(a.g)+'</title></rect><rect x="'+(x+bw*0.14+w+2)+'" y="'+y(Math.max(0,a.np))+'" width="'+w+'" height="'+(y(0)-y(Math.max(0,a.np)))+'" rx="2" fill="var(--gold)"><title>'+m+': profit net '+lei(a.np)+'</title></rect>'+((!sm||i%2===1)?'<text x="'+(x+bw/2)+'" y="'+(H-10)+'" text-anchor="middle">'+new Date(m+'-15').toLocaleDateString('ro-RO',{month:'short'})+'</text>':'');});svg+='</svg>';
 const tot=months.reduce((t,m)=>({g:t.g+agg[m].g,np:t.np+agg[m].np,p:t.p+agg[m].p}),{g:0,np:0,p:0});
 const chart=h('div',{class:'panel'},h('div',{class:'row between'},h('h2',null,'Vânzări și profit net, ultimele 12 luni'),h('div',{class:'leg'},h('span',null,h('i',{style:'background:var(--gold);opacity:.35'}),'Vânzări cu TVA'),h('span',null,h('i',{style:'background:var(--gold)'}),'Profit net'))),h('div',{html:svg,style:'margin-top:8px;overflow-x:auto'}),h('p',{class:'note'},'Total 12 luni: '+lei(tot.g)+' vânzări · '+lei(tot.np)+' profit net · '+lei(tot.p)+' cota partenerului.'));
 const topP=Object.entries(prod).sort((a,b)=>b[1].g-a[1].g).slice(0,8);
