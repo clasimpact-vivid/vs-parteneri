@@ -87,7 +87,7 @@ window.VSAdmin = {
     const sec = initializeApp(CFG.firebase, 'creare-' + Date.now());
     try {
       const cred = await createUserWithEmailAndPassword(getAuth(sec), email, password);
-      await db.doc('users/' + cred.user.uid).set({ name, email: email.toLowerCase(), role, active: true, notify: true, created: new Date().toISOString().slice(0, 10) });
+      await db.doc('users/' + cred.user.uid).set({ name, email: email.toLowerCase(), role, active: true, notify: true, mustChange: true, created: new Date().toISOString().slice(0, 10) });
       await signOut(getAuth(sec));
       return cred.user.uid;
     } finally { await deleteApp(sec); }
@@ -98,6 +98,33 @@ window.VSAdmin = {
     s => cb(s.docs.map(d => ({ id: d.id, ...d.data() }))), err),
   logout: () => signOut(auth)
 };
+
+// ---------- parolă nouă obligatorie la prima intrare ----------
+function forceNewPassword(u) {
+  return new Promise(resolve => {
+    const f = $('#pwf'), p1 = $('#pw1'), p2 = $('#pw2'), m = $('#pw-msg'), b = $('#pw-btn');
+    lf.hidden = true; f.hidden = false; login.hidden = false; document.body.classList.add('locked');
+    const say = t => { m.textContent = t; m.className = 'lmsg'; };
+    f.onsubmit = async e => {
+      e.preventDefault();
+      if (p1.value.length < 8) return say('Parola trebuie să aibă minimum 8 caractere.');
+      if (p1.value !== p2.value) return say('Cele două parole nu sunt la fel.');
+      b.disabled = true;
+      try {
+        await updatePassword(u, p1.value);
+        await updateDoc(doc(fs, 'users', u.uid), { mustChange: false });
+        f.hidden = true; lf.hidden = false; p1.value = p2.value = '';
+        resolve(true);
+      } catch (err) {
+        if (err && err.code === 'auth/requires-recent-login') {
+          await signOut(auth); f.hidden = true; lf.hidden = false;
+          msg('Intră din nou cu parola primită, apoi alegi parola nouă.'); resolve(false);
+        } else say('Nu s-a salvat. Încearcă din nou.');
+      } finally { b.disabled = false; }
+    };
+    setTimeout(() => p1.focus(), 50);
+  });
+}
 
 // ---------- pornire ----------
 let started = false;
@@ -114,6 +141,10 @@ onAuthStateChanged(auth, async u => {
   if (!rec || rec.active === false) {
     msg(rec ? 'Contul tău a fost dezactivat. Vorbește cu Alex.' : 'Contul nu are acces la aplicație. Cere-i lui Alex să te adauge.');
     await signOut(auth); login.hidden = false; return;
+  }
+  if (rec.mustChange === true) {
+    const ok = await forceNewPassword(u);
+    if (!ok) return;
   }
   const admin = isAdminEmail || rec.role === 'admin';
   meRec = { id: u.uid, name: rec.name || u.email, email: u.email, avatarUrl: avatar(rec.name || u.email), canEdit: admin, isOwner: admin, notify: rec.notify !== false };

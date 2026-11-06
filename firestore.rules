@@ -19,8 +19,9 @@ service cloud.firestore {
     match /users/{uid} {
       allow read: if isMember();
       allow create, delete: if isAdmin();
-      // Fiecare își poate schimba doar opțiunea de email zilnic; restul îl schimbă administratorul.
-      allow update: if isAdmin() || (request.auth.uid == uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['notify']));
+      // Fiecare își poate schimba doar opțiunea de email zilnic și poate confirma că și-a schimbat parola; restul îl schimbă administratorul.
+      allow update: if isAdmin() || (request.auth.uid == uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['notify', 'mustChange'])
+                                     && request.resource.data.get('mustChange', false) == false);
     }
 
     match /products/{id} { allow read: if isMember(); allow write: if isAdmin(); }
