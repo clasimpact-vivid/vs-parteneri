@@ -1,0 +1,63 @@
+rules_version = '2';
+
+// Reguli de acces Vivid Senses Parteneri.
+// Administratorul vede și face tot. Partenerul adaugă și modifică, dar nu poate șterge nimic,
+// nu vede vânzările eMAG și jurnalul, și nu poate schimba prețurile, setările sau utilizatorii.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function userDoc() { return get(/databases/$(database)/documents/users/$(request.auth.uid)); }
+    function hasUser() { return exists(/databases/$(database)/documents/users/$(request.auth.uid)); }
+    // Aceleași emailuri ca în config.js → adminEmails
+    function isAdminEmail() { return request.auth.token.email in ['clasimpact@gmail.com']; }
+    function isAdmin() { return signedIn() && (isAdminEmail() || (hasUser() && userDoc().data.role == 'admin' && userDoc().data.active != false)); }
+    function isMember() { return signedIn() && (isAdmin() || (hasUser() && userDoc().data.active != false)); }
+    function keepsAuthor() { return request.resource.data.by == resource.data.by; }
+    function isAuthor() { return request.resource.data.by == request.auth.uid; }
+
+    match /users/{uid} {
+      allow read: if isMember();
+      allow create, delete: if isAdmin();
+      // Fiecare își poate schimba doar opțiunea de email zilnic; restul îl schimbă administratorul.
+      allow update: if isAdmin() || (request.auth.uid == uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['notify']));
+    }
+
+    match /products/{id} { allow read: if isMember(); allow write: if isAdmin(); }
+    match /settings/{id} { allow read: if isMember(); allow write: if isAdmin(); }
+    match /salesEmag/{id} { allow read, write: if isAdmin(); }
+
+    match /sales/{id} {
+      allow read: if isMember();
+      allow create: if isMember() && (isAdmin() || isAuthor());
+      allow update: if isAdmin() || (isMember() && resource.data.by == request.auth.uid && keepsAuthor());
+      allow delete: if isAdmin();
+    }
+    match /moves/{id} {
+      allow read: if isMember();
+      allow create: if isMember() && (isAdmin() || isAuthor());
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+    match /clients/{id} {
+      allow read: if isMember();
+      allow create: if isMember() && (isAdmin() || isAuthor());
+      allow update: if isAdmin() || (isMember() && keepsAuthor());
+      allow delete: if isAdmin();
+    }
+    match /samples/{id} {
+      allow read: if isMember();
+      allow create: if isMember() && (isAdmin() || isAuthor());
+      allow update: if isAdmin() || (isMember() && keepsAuthor());
+      allow delete: if isAdmin();
+    }
+
+    // Jurnalul: oricine din echipă poate doar ADĂUGA o intrare în numele său; doar administratorul îl citește.
+    match /audit/{id} {
+      allow read: if isAdmin();
+      allow create: if isMember() && request.resource.data.by == request.auth.uid;
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
+  }
+}

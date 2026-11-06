@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Vivid Senses Parteneri</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%230e0d0c' stroke='%23c9a85f'/%3E%3Ctext x='16' y='21' font-family='Georgia' font-style='italic' font-size='13' text-anchor='middle' fill='%23c9a85f'%3EVS%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Playfair+Display:wght@500;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{color-scheme:light}html,body{margin:0}[hidden]{display:none!important}img{max-width:100%}
+
+/* Layout: o bară de brand + file (tabs); fiecare filă e un ecran de lucru dens, cu sumarul sus și detaliul dedesubt. */
+:root{
+  --bg:#f5f4f1; --surface:#ffffff; --surface2:#efede8; --line:#dcd8cf; --fg:#1b1916; --muted:#6f685d;
+  --gold:#94732f; --gold-soft:rgba(148,115,47,.12); --on-gold:#ffffff;
+  --good:#2f7a4c; --warn:#a86a10; --bad:#b4413a; --good-bg:rgba(47,122,76,.12); --warn-bg:rgba(168,106,16,.12); --bad-bg:rgba(180,65,58,.12);
+  --display:"Playfair Display",Georgia,"Times New Roman",serif; --body:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e0d0c; --surface:#171614; --surface2:#1f1d1a; --line:#2e2b26; --fg:#ece6da; --muted:#9b9387;
+  --gold:#c9a85f; --gold-soft:rgba(201,168,95,.13); --on-gold:#14120f;
+  --good:#71c08d; --warn:#e0ad4f; --bad:#e3746a; --good-bg:rgba(113,192,141,.13); --warn-bg:rgba(224,173,79,.13); --bad-bg:rgba(227,116,106,.14);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e0d0c; --surface:#171614; --surface2:#1f1d1a; --line:#2e2b26; --fg:#ece6da; --muted:#9b9387;
+  --gold:#c9a85f; --gold-soft:rgba(201,168,95,.13); --on-gold:#14120f;
+  --good:#71c08d; --warn:#e0ad4f; --bad:#e3746a; --good-bg:rgba(113,192,141,.13); --warn-bg:rgba(224,173,79,.13); --bad-bg:rgba(227,116,106,.14);
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:14.5px;line-height:1.5;font-variant-numeric:tabular-nums}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--side)}
+/* Shell: meniu lateral negru-auriu (aceeași identitate în ambele teme) + bară de sus cu căutare și „Nou” */
+:root{--side:#0e0d0c;--side2:#1a1815;--side-line:#2a2722;--side-fg:#e9e2d4;--side-mut:#8e877b;--side-gold:#c9a85f}
+.app{display:flex;min-height:100vh}
+.side{width:236px;flex-shrink:0;background:var(--side);color:var(--side-fg);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;padding:max(18px,env(safe-area-inset-top,0px)) 14px 16px max(14px,env(safe-area-inset-left,0px));z-index:15}
+.logo{display:flex;align-items:center;gap:10px;padding:4px 6px 18px;border-bottom:1px solid var(--side-line);margin-bottom:12px}
+.logo .mk{width:34px;height:34px;border-radius:50%;border:1px solid var(--side-gold);display:grid;place-items:center;font-family:var(--display);color:var(--side-gold);font-size:15px;font-style:italic}
+.logo .tx{font-family:var(--display);font-size:17px;line-height:1.1}
+.logo .tx small{display:block;font-family:var(--body);font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--side-gold);margin-top:3px}
+.sgrp{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--side-mut);padding:14px 10px 6px}
+.side button.nv{all:unset;box-sizing:border-box;width:100%;cursor:pointer;display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;font-size:13.5px;color:var(--side-fg);opacity:.82}
+.side button.nv svg{width:17px;height:17px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.6}
+.side button.nv:hover{background:var(--side2);opacity:1}
+.side button.nv[aria-current="page"]{background:var(--side2);opacity:1;color:var(--side-gold);box-shadow:inset 2px 0 0 var(--side-gold)}
+.side button.nv:focus-visible{outline:2px solid var(--side-gold);outline-offset:-2px}
+.side .bdg{margin-left:auto;font-size:11px;padding:1px 7px;border-radius:999px;background:var(--side2);color:var(--side-mut)}
+.side .bdg.hot{background:#b4413a;color:#fff}
+.who{margin-top:auto;display:flex;gap:9px;align-items:center;padding:12px 8px 0;border-top:1px solid var(--side-line);font-size:12.5px;color:var(--side-mut)}
+.who img{width:28px;height:28px;border-radius:50%}
+.who b{display:block;color:var(--side-fg);font-weight:500}
+.mainc{flex:1;min-width:0;display:flex;flex-direction:column}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding-block:11px;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.top .tt{font-family:var(--display);font-size:21px;white-space:nowrap}
+.srch{margin-left:auto;position:relative;width:min(320px,40vw)}
+.srch input{padding-left:32px;background:var(--surface2);border-color:transparent}
+.srch svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:15px;height:15px;stroke:var(--muted);fill:none;stroke-width:1.8}
+.ham{display:none}
+.sback{display:none}
+main{width:100%;max-width:1280px;margin:0 auto;padding-block:22px 60px;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:20px}
+#main h1{display:none}
+@media (max-width:860px){
+  .side{position:fixed;left:0;top:0;transform:translateX(-105%);transition:transform .22s ease}
+  .side.open{transform:none}
+  .sback.open{display:block;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:14}
+  .ham{display:inline-flex}
+  .srch{width:auto;flex:1}
+  .top .tt{font-size:18px}
+  main{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.st{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:13px 15px;display:flex;flex-direction:column;gap:2px;cursor:default}
+.st.click{cursor:pointer}.st.click:hover,.st.on{border-color:var(--gold)}
+.st .l{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.st .v{font-size:24px;font-weight:500}
+.st .v.g{color:var(--gold)}
+.fbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.fbar select{width:auto;min-width:150px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-left:auto}
+.seg button{all:unset;cursor:pointer;padding:7px 13px;font-size:13px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--gold-soft);color:var(--gold);font-weight:600}
+.seg button:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
+tr.clk{cursor:pointer}
+.cname b{display:block}.cname span{font-size:12px;color:var(--muted)}
+.tl{display:flex;flex-direction:column;gap:0;border-left:1px solid var(--line);margin-left:6px}
+.tl .ti{position:relative;padding:0 0 12px 16px;font-size:13px}
+.tl .ti::before{content:"";position:absolute;left:-5px;top:5px;width:9px;height:9px;border-radius:50%;background:var(--surface);border:2px solid var(--gold)}
+.tl .ti.s::before{border-color:var(--warn)}.tl .ti.v::before{border-color:var(--good)}
+.tl .ti .d{font-size:11.5px;color:var(--muted)}
+.dhead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.dhead .t{font-family:var(--display);font-size:22px;line-height:1.15}
+.stg{display:flex;gap:6px;flex-wrap:wrap}
+.stg button{all:unset;cursor:pointer;font-size:12px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.stg button[aria-pressed="true"]{border-color:var(--gold);background:var(--gold-soft);color:var(--gold);font-weight:600}
+.chart{width:100%;height:auto;display:block}
+.chart text{fill:var(--muted);font-size:11px;font-family:var(--body)}
+.leg{display:flex;gap:14px;font-size:12px;color:var(--muted)}
+.leg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+h1{font-family:var(--display);font-weight:500;font-size:26px;margin:0;text-wrap:balance}
+h2{font-family:var(--display);font-weight:500;font-size:19px;margin:0 0 4px;text-wrap:balance}
+.sub{color:var(--muted);margin:2px 0 0;max-width:70ch}
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.between{justify-content:space-between}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;min-width:0}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:13px 15px;display:flex;flex-direction:column;gap:2px}
+.kpi .l{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.kpi .v{font-size:22px;font-weight:500}
+.kpi .n{font-size:12px;color:var(--muted)}
+.kpi.hl .v{color:var(--gold)}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:middle}
+th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500;background:var(--surface2);position:sticky;top:0}
+td.num,th.num{text-align:right}
+tr:last-child td{border-bottom:0}
+tbody tr:hover{background:var(--gold-soft)}
+td.wrapc{white-space:normal;min-width:180px}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;background:var(--surface2);color:var(--muted)}
+.pill.good{background:var(--good-bg);color:var(--good)} .pill.warn{background:var(--warn-bg);color:var(--warn)} .pill.bad{background:var(--bad-bg);color:var(--bad)} .pill.gold{background:var(--gold-soft);color:var(--gold)}
+.pos{color:var(--good)} .neg{color:var(--bad)} .mut{color:var(--muted)}
+button.b{font:inherit;font-size:13.5px;cursor:pointer;border-radius:8px;padding:8px 14px;border:1px solid var(--line);background:var(--surface);color:var(--fg)}
+button.b:hover{border-color:var(--gold)}
+button.b.pri{background:var(--gold);border-color:var(--gold);color:var(--on-gold);font-weight:600}
+button.b.sm{padding:4px 10px;font-size:12.5px}
+button.b.danger{color:var(--bad)}
+button.b:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+button.b[disabled]{opacity:.5;cursor:default}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);min-width:0}
+input,select,textarea{font:inherit;font-size:14px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:7px 9px;min-width:0;width:100%}
+textarea{min-height:64px;resize:vertical}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+.todo{display:flex;flex-direction:column;gap:8px}
+.todo .it{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 12px;border:1px solid var(--line);border-radius:8px;flex-wrap:wrap}
+.pipe{display:grid;grid-template-columns:repeat(6,minmax(210px,1fr));gap:10px;overflow-x:auto;padding-bottom:6px}
+.col{background:var(--surface2);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px;min-height:120px}
+.col h3{margin:0;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500;display:flex;justify-content:space-between}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px;cursor:pointer;display:flex;flex-direction:column;gap:3px}
+.card:hover{border-color:var(--gold)}
+.card .t{font-weight:600}
+.card .m{font-size:12px;color:var(--muted)}
+.bar{height:6px;border-radius:3px;background:var(--surface2);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--gold)}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:20;display:flex;justify-content:flex-end}
+.modal{background:var(--surface);border-left:1px solid var(--line);width:min(640px,100%);height:100%;overflow-y:auto;padding:max(20px,env(safe-area-inset-top,0px)) max(22px,env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) 22px;display:flex;flex-direction:column;gap:14px}
+.modal .acts{position:sticky;bottom:calc(-20px - env(safe-area-inset-bottom,0px));background:var(--surface);padding:12px 0 calc(4px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);margin-top:auto}
+@media (prefers-reduced-motion:no-preference){.modal{animation:sin .22s cubic-bezier(.16,1,.3,1)}@keyframes sin{from{transform:translateX(40px);opacity:.4}to{transform:none;opacity:1}}}
+.lines{display:flex;flex-direction:column;gap:8px}
+.line{display:grid;grid-template-columns:minmax(0,3fr) 80px 110px 34px;gap:8px;align-items:end}
+@media (max-width:560px){.line{grid-template-columns:minmax(0,1fr) 70px 90px 30px}}
+.calc{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;background:var(--surface2);border-radius:8px;padding:12px}
+.calc div{display:flex;flex-direction:column}
+.calc .l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+.note{font-size:12.5px;color:var(--muted)}
+.notes{display:flex;flex-direction:column;gap:6px;max-height:240px;overflow-y:auto}
+.notes div{border-left:2px solid var(--gold);padding:2px 10px;font-size:13px}
+.toast{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:10px 14px;border-radius:8px;z-index:30;font-size:13.5px}
+.chk{display:flex;gap:6px;flex-wrap:wrap}
+.chk label{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--fg);border:1px solid var(--line);border-radius:7px;padding:5px 9px}
+.chk input{width:auto}
+.fu{display:flex;gap:6px;flex-wrap:wrap}
+@media (prefers-reduced-motion:no-preference){.card,button.b{transition:border-color .15s}}
+
+/* Login */
+body.locked .app{display:none}
+#login{position:fixed;inset:0;z-index:40;background:#0e0d0c;display:grid;place-items:center;padding:24px}
+#login .box{width:min(380px,100%);color:#e9e2d4;display:flex;flex-direction:column;gap:14px}
+#login .mk{width:56px;height:56px;border-radius:50%;border:1px solid #c9a85f;display:grid;place-items:center;font-family:var(--display);font-style:italic;color:#c9a85f;font-size:22px}
+#login h1{display:block;font-family:var(--display);font-weight:500;font-size:30px;margin:6px 0 0;color:#f2ece1}
+#login p{margin:0;color:#8e877b;font-size:13.5px}
+#login label{display:flex;flex-direction:column;gap:5px;font-size:12px;color:#8e877b;letter-spacing:.06em;text-transform:uppercase}
+#login input{background:#1a1815;border:1px solid #2e2b26;color:#f2ece1;padding:11px 12px;font-size:15px;border-radius:8px}
+#login input:focus-visible{outline:2px solid #c9a85f;outline-offset:1px}
+#login button.go{font:inherit;font-weight:600;background:#c9a85f;color:#14120f;border:0;border-radius:8px;padding:12px;cursor:pointer;font-size:15px}
+#login button.go[disabled]{opacity:.6}
+#login .lnk{all:unset;cursor:pointer;color:#c9a85f;font-size:13px;align-self:flex-start}
+.lmsg{min-height:18px;font-size:13px;color:#e3746a}.lmsg.ok{color:#71c08d}
+/* Decont tipărit */
+#print{display:none}
+@media print{
+  @page{size:A4;margin:16mm}
+  body{background:#fff!important;color:#000!important}
+  body *{visibility:hidden}
+  #print,#print *{visibility:visible}
+  #print{display:block;position:absolute;inset:0;font-family:var(--body);font-size:11pt;color:#000}
+  #print .ph{display:flex;justify-content:space-between;border-bottom:1.5pt solid #000;padding-bottom:8pt;margin-bottom:12pt}
+  #print .pt{font-family:var(--display);font-size:20pt}
+  #print table{width:100%;border-collapse:collapse;font-size:9.5pt}
+  #print th,#print td{border-bottom:.5pt solid #999;padding:4pt;text-align:left;white-space:normal;background:none;color:#000;position:static}
+  #print td.num{text-align:right}
+  #print tfoot td{font-weight:700;border-top:1pt solid #000}
+  #print .sig{display:flex;justify-content:space-between;margin-top:36pt}
+  #print .sig div{width:45%;border-top:.5pt solid #000;padding-top:4pt}
+}
+@media (max-width:860px){#exps{display:none!important}}
+</style>
+</head>
+<body class="locked">
+<div id="login" hidden>
+  <form class="box" id="lf" novalidate>
+    <div class="mk">VS</div>
+    <h1>Vivid Senses Parteneri</h1>
+    <p>Intră cu emailul și parola primite de la Alex.</p>
+    <label>Email<input id="l-email" type="email" autocomplete="username" required></label>
+    <label>Parolă<input id="l-pass" type="password" autocomplete="current-password" required></label>
+    <div class="lmsg" id="l-msg" role="status"></div>
+    <button class="go" id="l-btn" type="submit">Intră</button>
+    <button class="lnk" id="l-reset" type="button">Am uitat parola</button>
+  </form>
+</div>
+<div class="app">
+  <aside class="side" id="side">
+    <div class="logo"><div class="mk">VS</div><div class="tx">Vivid Senses<small>Parteneri</small></div></div>
+    <nav id="nav" aria-label="Secțiuni"></nav>
+    <div class="who" id="who"></div>
+  </aside>
+  <div class="sback" id="sback"></div>
+  <div class="mainc">
+    <div class="top">
+      <button class="b sm ham" id="ham" aria-label="Deschide meniul">☰</button>
+      <div class="tt" id="tt">Panou</div>
+      <label class="srch"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" type="search" placeholder="Caută client, oraș, produs…" aria-label="Caută"></label>
+      <div class="row" id="exps" style="gap:8px;flex-wrap:nowrap"></div>
+      <button class="b pri" id="newb">+ Nou</button>
+    </div>
+    <main id="main"><div class="empty">Se încarcă datele…</div></main>
+  </div>
+</div>
+<div id="ovroot"></div>
+
+<div id="print"></div>
+<script src="config.js"></script>
+<script>window.__vsBridge={};(function(){var p={};['user','db'].forEach(function(k){p[k]=new Promise(function(r){window.__vsBridge[k]=r;});});window.claude={use:function(n){return p[n]||Promise.resolve(null);}};})();</script>
+<script>
+(() => {
+const DEF = {vat:21, micro:1, divTax:16, shareSite:50, shareAgent:50, shareEmag:0, payFee:1.9, emagFee:21, sampleTarget:30};
+const CH = {site:'Site vividsenses.ro', agent:'Agent (teren)', emag:'eMAG'};
+const KINDS = ['Difuzor','Rezervă','Spray','Set cadou','Săculeț auto','Lumânare','Altele'];
+const SIZES = [125,250,500,1000,2500,5000];
+const STAGES = [['prospect','Prospect'],['mostra','Mostră lăsată'],['followup','Follow-up'],['oferta','Ofertă trimisă'],['client','Client activ'],['pierdut','Pierdut']];
+const CKINDS = ['Hotel','Pensiune','Restaurant / cafenea','Clinică / cabinet','Showroom auto','Birouri','Salon / spa','Magazin','Persoană fizică','Altele'];
+const FU = [[3,'Apel ziua 3','A pus difuzorul? Ce părere are?'],[10,'Vizită ziua 10','Feedback, prezintă oferta'],[21,'Decizie ziua 21','Comandă sau închidem']];
+const AROMAS = 'Klinto 1817\nAzad Kashmere\nCafé Satin\nHabana Tobacco\nVenetiae\nAramaik\nDolce Roma XXI';
+
+let db=null, user=null, me={id:null}, isAdmin=false, canWrite=true;
+const S = {products:{}, moves:[], sales:[], clients:{}, samples:[], settings:{...DEF}, loaded:{}};
+let tab = 'panou'; let month = new Date().toISOString().slice(0,7); let profiles={};
+try{ const t=localStorage.getItem('vsp-tab'); if(t) tab=t; }catch(e){}
+
+// ---------- helpers ----------
+const $=s=>document.querySelector(s);
+function h(tag,attrs,...kids){const e=document.createElement(tag);if(attrs)for(const[k,v]of Object.entries(attrs)){if(v==null||v===false)continue;if(k.startsWith('on'))e.addEventListener(k.slice(2),v);else if(k==='class')e.className=v;else if(k==='html')e.innerHTML=v;else if(k==='value')e.value=v;else e.setAttribute(k,v===true?'':v);}for(const k of kids.flat()){if(k==null||k===false)continue;e.append(k instanceof Node?k:document.createTextNode(String(k)));}return e;}
+const n2=v=>Number.isFinite(+v)?+v:0;
+const lei=(v,d=0)=>(n2(v)).toLocaleString('ro-RO',{minimumFractionDigits:d,maximumFractionDigits:d})+' lei';
+const pct=v=>(Number.isFinite(v)?v.toLocaleString('ro-RO',{maximumFractionDigits:1}):'–')+'%';
+const today=()=>new Date().toISOString().slice(0,10);
+const addDays=(d,k)=>{const x=new Date(d+'T12:00:00');x.setDate(x.getDate()+k);return x.toISOString().slice(0,10);};
+const fmtD=d=>d?new Date(d+'T12:00:00').toLocaleDateString('ro-RO',{day:'numeric',month:'short'}):'–';
+const pname=id=>{const p=S.products[id];return p?prodLabel(p):'(produs șters)';};
+function prodLabel(p){return [p.line&&p.line!=='Locherber Milano'?p.line:null,p.name,p.kind&&p.kind!=='Difuzor'?p.kind.toLowerCase():null,p.size?p.size+' ml':null].filter(Boolean).join(' · ');}
+function toast(t){const e=h('div',{class:'toast',role:'status'},t);document.body.append(e);setTimeout(()=>e.remove(),2600);}
+function personName(id){if(!id)return '–';if(id===me.id)return 'tu';const p=profiles[id];return (p&&p.name)||'partener';}
+async function resolvePeople(){if(!user)return;const ids=new Set();for(const s of S.sales)if(s.by)ids.add(s.by);for(const c of Object.values(S.clients))if(c.by)ids.add(c.by);for(const s of S.samples)if(s.by)ids.add(s.by);for(const m of S.moves)if(m.by)ids.add(m.by);if(!ids.size)return;try{profiles=await user.profiles([...ids]);}catch(e){}}
+async function guard(fn,ok){try{await fn();if(ok)toast(ok);}catch(e){const c=e&&e.code;toast(c==='invalid_argument'?'Nu ai drept să modifici asta.':c==='quota_exceeded'?'Baza de date e plină. Șterge înregistrări vechi.':'Nu s-a salvat. Încearcă din nou.');console.warn(e);}}
+
+// ---------- calcule ----------
+const set=()=>({...DEF,...S.settings});
+function stockOf(pid){let q=0;for(const m of S.moves)if(m.productId===pid)q+=n2(m.qty);for(const s of S.sales)for(const l of s.lines||[])if(l.productId===pid)q-=n2(l.qty);for(const s of S.samples)if(s.productId===pid)q-=n2(s.qty||1);return q;}
+function unitCalc(p){const st=set();const price=n2(p.price),cost=n2(p.cost);const net=price/(1+st.vat/100);const gp=net-cost;const micro=net*st.micro/100;const np=gp-micro;return{price,net,cost,gp,micro,np,margin:net>0?gp/net*100:NaN,markup:cost>0?(net/cost-1)*100:NaN,partner:Math.max(0,np*st.shareAgent/100)};}
+function shareFor(ch){const st=set();return ch==='site'?st.shareSite:ch==='agent'?st.shareAgent:st.shareEmag;}
+function saleCalc(s){const st=set();let gross=0,cogs=0;for(const l of s.lines||[]){gross+=n2(l.qty)*n2(l.unitPrice);cogs+=n2(l.qty)*n2(l.unitCost);}const net=gross/(1+st.vat/100);const fees=s.channel==='emag'?gross*st.emagFee/100:s.channel==='site'?gross*st.payFee/100:0;const ship=n2(s.ship);const gp=net-cogs-fees-ship;const micro=net*st.micro/100;const np=gp-micro;const sh=shareFor(s.channel);const partner=np*sh/100;return{gross,net,vat:gross-net,cogs,fees,ship,gp,micro,np,sh,partner,alex:np-partner};}
+function inMonth(d){return !month||(d||'').slice(0,7)===month;}
+function monthAgg(){const r={gross:0,net:0,cogs:0,fees:0,ship:0,gp:0,micro:0,np:0,partner:0,alex:0,orders:0,byCh:{}};for(const s of S.sales){if(!inMonth(s.date))continue;const c=saleCalc(s);r.orders++;for(const k of['gross','net','cogs','fees','ship','gp','micro','np','partner','alex'])r[k]+=c[k];const b=r.byCh[s.channel]||(r.byCh[s.channel]={gross:0,np:0,partner:0,orders:0});b.gross+=c.gross;b.np+=c.np;b.partner+=c.partner;b.orders++;}let sc=0,sn=0;for(const s of S.samples){if(!inMonth(s.date))continue;sn+=n2(s.qty||1);sc+=n2(s.qty||1)*n2(s.unitCost);}r.samples=sn;r.sampleCost=sc;if(r.partner<0){r.alex+=r.partner;r.partner=0;r.carry=true;}return r;}
+function fuDue(){const out=[];const t=today();for(const s of S.samples){if(s.outcome)continue;FU.forEach(([d,lab],i)=>{if(s['f'+i])return;const due=addDays(s.date,d);if(due<=t)out.push({kind:'fu',s,i,due,lab});});}for(const c of Object.values(S.clients)){if(c.nextDate&&c.nextDate<=t&&c.stage!=='pierdut')out.push({kind:'cl',c,due:c.nextDate});}return out.sort((a,b)=>a.due<b.due?-1:1);}
+
+// ---------- shell ----------
+const IC={jurnal:'M12 8v4l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0',panou:'M3 13h8V3H3zM13 21h8V11h-8zM3 21h8v-6H3zM13 9h8V3h-8z',clienti:'M16 19v-1a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v1M9 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6M22 19v-1a4 4 0 0 0-3-3.9M16 4.1a3 3 0 0 1 0 5.8',mostre:'M9 3h6M10 3v4l-4 9a3 3 0 0 0 2.7 4h6.6a3 3 0 0 0 2.7-4l-4-9V3',vanzari:'M3 3v18h18M7 15l4-4 3 3 6-6',produse:'M20 7 12 3 4 7v10l8 4 8-4zM4 7l8 4 8-4M12 11v10',stoc:'M3 7h18M3 12h18M3 17h18M7 7v10M17 7v10',rapoarte:'M4 20V10M10 20V4M16 20v-7M22 20H2',setari:'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1'};
+const TABS=[['g','Vânzare'],['panou','Panou'],['clienti','Clienți'],['mostre','Mostre'],['vanzari','Vânzări'],['g','Marfă'],['produse','Produse & prețuri'],['stoc','Stoc'],['g','Analiză'],['rapoarte','Rapoarte'],['jurnal','Jurnal'],['setari','Setări']];
+const TITLES={panou:'Panou',clienti:'Clienți',mostre:'Mostre și follow-up',vanzari:'Vânzări',produse:'Produse & prețuri',stoc:'Stoc',rapoarte:'Rapoarte',jurnal:'Jurnal',setari:'Setări'};
+let q='';const match=(...xs)=>!q||xs.join(' ').toLowerCase().includes(q.toLowerCase());
+function go(k){tab=k;try{localStorage.setItem('vsp-tab',k);}catch(e){}$('#side').classList.remove('open');$('#sback').classList.remove('open');renderNav();render();window.scrollTo(0,0);}
+function renderNav(){const due=fuDue().length;const badge={clienti:Object.keys(S.clients).length||null,mostre:due?[due,'hot']:null};$('#nav').replaceChildren(...TABS.filter(([k])=>k!=='jurnal'||isAdmin).map(([k,l])=>k==='g'?h('div',{class:'sgrp'},l):h('button',{class:'nv','aria-current':tab===k?'page':null,onclick:()=>go(k)},h('span',{html:'<svg viewBox="0 0 24 24"><path d="'+IC[k]+'"/></svg>'}),l,badge[k]?h('span',{class:'bdg'+(Array.isArray(badge[k])?' hot':'')},Array.isArray(badge[k])?badge[k][0]:badge[k]):null)));$('#tt').textContent=TITLES[tab]||'Panou';const nb=$('#newb');const act={panou:['+ Vânzare',()=>saleModal()],clienti:['+ Client nou',()=>clientModal()],mostre:['+ Mostră',()=>sampleModal()],vanzari:['+ Vânzare',()=>saleModal()],produse:isAdmin?['+ Produs',()=>prodModal()]:null,stoc:['+ Intrare marfă',()=>moveModal()]}[tab];nb.hidden=!act;if(act){nb.textContent=act[0];nb.onclick=act[1];}const ex={vanzari:[['Excel',exportVanzari],['Decont PDF',printDecont]],clienti:[['Excel',exportClienti]],stoc:[['Excel',exportStoc]]}[tab]||[];$('#exps').replaceChildren(...ex.map(([l,f])=>h('button',{class:'b',onclick:f},l)));}
+function monthPicker(){return h('label',{class:'f',style:'max-width:180px'},'Luna',h('input',{type:'month',id:'month',value:month,onchange:e=>{month=e.target.value;render();}}));}
+let rq=false;function render(){if(rq)return;rq=true;requestAnimationFrame(()=>{rq=false;renderNav();const m=$('#main');const f={panou:vPanou,produse:vProduse,stoc:vStoc,vanzari:vVanzari,clienti:vClienti,mostre:vMostre,rapoarte:vRapoarte,jurnal:vJurnal,setari:vSetari}[tab]||vPanou;m.replaceChildren(...[].concat(f()).filter(x=>x!=null&&x!==false));});}
+$('#ham').onclick=()=>{$('#side').classList.add('open');$('#sback').classList.add('open');};$('#sback').onclick=()=>{$('#side').classList.remove('open');$('#sback').classList.remove('open');};
+let qt;$('#q').addEventListener('input',e=>{clearTimeout(qt);qt=setTimeout(()=>{q=e.target.value.trim();render();},150);});
+
+// ---------- PANOU ----------
+function vPanou(){const a=monthAgg();const st=set();const stockVal=Object.values(S.products).reduce((t,p)=>t+Math.max(0,stockOf(p.id))*n2(p.cost),0);const low=Object.values(S.products).filter(p=>p.active!==false&&n2(p.minStock)>0&&stockOf(p.id)<=n2(p.minStock));const due=fuDue();
+const kp=(l,v,n,hl)=>h('div',{class:'kpi'+(hl?' hl':'')},h('span',{class:'l'},l),h('span',{class:'v'},v),n?h('span',{class:'n'},n):null);
+const head=h('div',{class:'row between'},h('div',null,h('div',{class:'eyebrow'},'Situația lunii'),h('h1',null,'Panou'),h('p',{class:'sub'},'Aceleași cifre pentru amândoi. Profitul net e după TVA, costul mărfii, comisioane, transport și impozitul de micro.')),monthPicker());
+const kpis=h('div',{class:'kpis'},kp('Vânzări cu TVA',lei(a.gross),a.orders+' comenzi'),kp('Profit brut',lei(a.gp),a.net>0?'marjă '+pct(a.gp/a.net*100):''),kp('Profit net',lei(a.np),'după micro '+st.micro+'%'),kp('Cota partenerului',lei(a.partner),'din profitul net',true),kp('Cota Vivid Senses',lei(a.alex),'înainte de dividende'),kp('Mostre date',a.samples,'cost '+lei(a.sampleCost)),kp('Valoare stoc',lei(stockVal),'la preț de achiziție'));
+const chRows=Object.entries(a.byCh);const chT=h('div',{class:'panel'},h('h2',null,'Pe canale'),chRows.length?h('div',{class:'tw',style:'margin-top:10px'},h('table',null,h('thead',null,h('tr',null,h('th',null,'Canal'),h('th',{class:'num'},'Comenzi'),h('th',{class:'num'},'Vânzări'),h('th',{class:'num'},'Profit net'),h('th',{class:'num'},'Cotă partener'))),h('tbody',null,chRows.map(([k,b])=>h('tr',null,h('td',null,CH[k]||k,' ',h('span',{class:'pill'},shareFor(k)+'%')),h('td',{class:'num'},b.orders),h('td',{class:'num'},lei(b.gross)),h('td',{class:'num'},lei(b.np)),h('td',{class:'num'},lei(b.partner))))))):h('p',{class:'empty'},'Nicio vânzare în luna asta. Adaug-o din fila Vânzări.'));
+const todo=h('div',{class:'panel'},h('h2',null,'De făcut azi'),due.length?h('div',{class:'todo',style:'margin-top:10px'},due.slice(0,12).map(d=>d.kind==='fu'?h('div',{class:'it'},h('div',null,h('div',null,h('b',null,(S.clients[d.s.clientId]||{}).name||'Client'),' · ',d.lab),h('div',{class:'note'},pname(d.s.productId)+' · scadent '+fmtD(d.due))),h('span',{class:'pill '+(d.due<today()?'bad':'warn')},d.due<today()?'întârziat':'azi')):h('div',{class:'it'},h('div',null,h('div',null,h('b',null,d.c.name),' · ',d.c.nextText||'Următorul pas'),h('div',{class:'note'},'scadent '+fmtD(d.due))),h('span',{class:'pill '+(d.due<today()?'bad':'warn')},d.due<today()?'întârziat':'azi')))):h('p',{class:'empty'},'Nimic restant. Follow-up-urile pentru mostre apar aici automat.'));
+const lowP=h('div',{class:'panel'},h('h2',null,'Stoc sub minim'),low.length?h('div',{class:'todo',style:'margin-top:10px'},low.map(p=>h('div',{class:'it'},h('span',null,prodLabel(p)),h('span',{class:'pill bad'},stockOf(p.id)+' buc (min '+p.minStock+')')))):h('p',{class:'empty'},'Toate produsele sunt peste stocul minim.'));
+const pipe={};for(const c of Object.values(S.clients))pipe[c.stage||'prospect']=(pipe[c.stage||'prospect']||0)+1;const tot=Object.values(pipe).reduce((a,b)=>a+b,0)||1;
+const crm=h('div',{class:'panel'},h('h2',null,'Clienți pe etape'),h('div',{class:'todo',style:'margin-top:10px'},STAGES.map(([k,l])=>h('div',null,h('div',{class:'row between',style:'font-size:13px'},h('span',null,l),h('span',{class:'mut'},pipe[k]||0)),h('div',{class:'bar'},h('i',{style:'width:'+((pipe[k]||0)/tot*100)+'%'}))))));
+return [head,kpis,h('div',{class:'grid g2'},todo,chT,crm,lowP)];}
+
+// ---------- PRODUSE ----------
+function vProduse(){const ps=Object.values(S.products).filter(p=>match(prodLabel(p),p.sku||'')).sort((a,b)=>prodLabel(a).localeCompare(prodLabel(b),'ro'));const st=set();
+const head=h('div',{class:'row between'},h('div',null,h('div',{class:'eyebrow'},'Calculator pe produs'),h('h1',null,'Produse & prețuri'),h('p',{class:'sub'},'Prețul de achiziție e fără TVA, prețul de vânzare e cu TVA (cum apare pe site). Profitul net pe bucată include impozitul de micro de '+st.micro+'%. Cota partenerului e calculată la '+st.shareAgent+'%.')),isAdmin?h('div',{class:'row'},h('button',{class:'b',onclick:bulkModal},'Adaugă o gamă'),h('button',{class:'b pri',onclick:()=>prodModal()},'Adaugă produs')):h('span',{class:'pill'},'Doar Alex modifică prețurile'));
+if(!ps.length)return [head,h('div',{class:'panel empty'},'Niciun produs încă. ',isAdmin?'Apasă „Adaugă o gamă” ca să creezi dintr-o dată toate aromele Locherber pe mărimi, apoi completează prețurile.':'Alex adaugă produsele și prețurile.')];
+const t=h('div',{class:'tw'},h('table',null,h('thead',null,h('tr',null,['Produs','Achiziție','Vânzare','Fără TVA','Profit brut','Marjă','Profit net','Cotă partener','Stoc',''].map((x,i)=>h('th',{class:i&&i<9?'num':null},x)))),h('tbody',null,ps.map(p=>{const u=unitCalc(p);const sk=stockOf(p.id);return h('tr',{style:p.active===false?'opacity:.5':null},h('td',null,prodLabel(p)),h('td',{class:'num'},lei(u.cost,2)),h('td',{class:'num'},lei(u.price,2)),h('td',{class:'num mut'},lei(u.net,2)),h('td',{class:'num '+(u.gp<0?'neg':'')},lei(u.gp,2)),h('td',{class:'num'},h('span',{class:'pill '+(!(u.price>0&&u.cost>0)?'':u.margin>=45?'good':u.margin>=25?'warn':'bad')},u.price>0&&u.cost>0?pct(u.margin):'de completat')),h('td',{class:'num '+(u.np<0?'neg':'')},lei(u.np,2)),h('td',{class:'num'},lei(u.partner,2)),h('td',{class:'num '+(n2(p.minStock)&&sk<=n2(p.minStock)?'neg':'')},sk),h('td',null,isAdmin?h('button',{class:'b sm',onclick:()=>prodModal(p)},'Editează'):null));}))));
+return [head,t,h('p',{class:'note'},'Marjă = profit brut ÷ preț fără TVA. Verde peste 45%, galben 25–45%, roșu sub 25%.')];}
+function prodModal(p){p=p||{line:'Locherber Milano',kind:'Difuzor',size:500,active:true};const f={};const inp=(k,lab,type='text',opts)=>{const el=opts?h('select',{id:'p-'+k},opts.map(o=>h('option',{value:o,selected:String(p[k])===String(o)},o))):h('input',{id:'p-'+k,type,step:type==='number'?'0.01':null,value:p[k]??''});f[k]=el;el.addEventListener('input',upd);return h('label',{class:'f'},lab,el);};
+const calc=h('div',{class:'calc'});function upd(){const q={price:f.price.value,cost:f.cost.value};const u=unitCalc(q);calc.replaceChildren(...[['Fără TVA',lei(u.net,2)],['Profit brut',lei(u.gp,2)],['Marjă',pct(u.margin)],['Adaos',pct(u.markup)],['Profit net',lei(u.np,2)],['Cotă partener',lei(u.partner,2)]].map(([l,v])=>h('div',null,h('span',{class:'l'},l),h('b',null,v))));}
+const act=h('input',{type:'checkbox',id:'p-active',checked:p.active!==false,style:'width:auto'});
+const body=[h('h2',null,p.id?'Editează produsul':'Produs nou'),h('div',{class:'fgrid'},inp('line','Brand / linie'),inp('name','Nume (aromă)'),inp('kind','Tip','text',KINDS),inp('size','Mărime (ml)','number'),inp('cost','Preț achiziție, fără TVA (lei)','number'),inp('price','Preț vânzare, cu TVA (lei)','number'),inp('minStock','Stoc minim (alertă)','number'),inp('sku','Cod / SKU')),calc,h('label',{class:'row',style:'font-size:13px'},act,'Activ (apare la vânzări)')];
+upd();modal(body,[p.id?h('button',{class:'b danger',onclick:e=>confirmBtn(e.target,async()=>{await guard(()=>db.doc('products/'+p.id).delete(),'Produs șters');close();})},'Șterge'):null,h('button',{class:'b',onclick:close},'Renunță'),h('button',{class:'b pri',onclick:async()=>{const d={line:f.line.value.trim(),name:f.name.value.trim(),kind:f.kind.value,size:n2(f.size.value)||null,cost:n2(f.cost.value),price:n2(f.price.value),minStock:n2(f.minStock.value),sku:f.sku.value.trim(),active:act.checked,updated:today()};if(!d.name){toast('Scrie numele produsului.');return;}await guard(()=>p.id?db.doc('products/'+p.id).set({...d,created:p.created||today()}):db.collection('products').add({...d,created:today()}),'Salvat');close();}},'Salvează')]);}
+function bulkModal(){const ta=h('textarea',{id:'b-ar',style:'min-height:150px',value:AROMAS});const line=h('input',{id:'b-line',value:'Locherber Milano'});const kind=h('select',{id:'b-kind'},KINDS.map(k=>h('option',null,k)));const boxes=SIZES.map(s=>h('input',{type:'checkbox',value:s,checked:[125,500,1000].includes(s)}));
+modal([h('h2',null,'Adaugă o gamă'),h('p',{class:'note'},'Creează câte un produs pentru fiecare aromă × mărime bifată. Prețurile le completezi apoi în tabel.'),h('div',{class:'fgrid'},h('label',{class:'f'},'Brand / linie',line),h('label',{class:'f'},'Tip',kind)),h('label',{class:'f'},'Arome (câte una pe rând)',ta),h('div',null,h('div',{class:'note',style:'margin-bottom:6px'},'Mărimi (ml)'),h('div',{class:'chk'},boxes.map(b=>h('label',null,b,b.value+' ml'))))],[h('button',{class:'b',onclick:close},'Renunță'),h('button',{class:'b pri',onclick:async e=>{const ar=ta.value.split('\n').map(x=>x.trim()).filter(Boolean);const sz=boxes.filter(b=>b.checked).map(b=>+b.value);if(!ar.length||!sz.length){toast('Alege cel puțin o aromă și o mărime.');return;}e.target.disabled=true;const ex=new Set(Object.values(S.products).map(p=>[p.line,p.name,p.kind,p.size].join('|')));let k=0;for(const a of ar)for(const s of sz){const key=[line.value.trim(),a,kind.value,s].join('|');if(ex.has(key))continue;try{await db.collection('products').add({line:line.value.trim(),name:a,kind:kind.value,size:s,cost:0,price:0,minStock:0,active:true,created:today()});k++;}catch(err){toast('S-a oprit după '+k+' produse.');close();return;}}toast(k+' produse create');close();}},'Creează')]);}
+
+// ---------- STOC ----------
+function vStoc(){const ps=Object.values(S.products).filter(p=>p.active!==false&&match(prodLabel(p))).sort((a,b)=>prodLabel(a).localeCompare(prodLabel(b),'ro'));let val=0,units=0;for(const p of ps){const s=Math.max(0,stockOf(p.id));val+=s*n2(p.cost);units+=s;}
+const head=h('div',{class:'row between'},h('div',null,h('div',{class:'eyebrow'},'La zi, pentru amândoi'),h('h1',null,'Stoc'),h('p',{class:'sub'},'Stocul se calculează singur: intrări de marfă minus vânzări minus mostre. Orice corecție rămâne în istoric, cu numele celui care a făcut-o.')),h('button',{class:'b pri',onclick:()=>moveModal()},'Intrare marfă / corecție'));
+const k=h('div',{class:'kpis'},h('div',{class:'kpi'},h('span',{class:'l'},'Bucăți în stoc'),h('span',{class:'v'},units)),h('div',{class:'kpi hl'},h('span',{class:'l'},'Valoare la achiziție'),h('span',{class:'v'},lei(val))),h('div',{class:'kpi'},h('span',{class:'l'},'Valoare la vânzare'),h('span',{class:'v'},lei(ps.reduce((t,p)=>t+Math.max(0,stockOf(p.id))*n2(p.price),0)))));
+const t=ps.length?h('div',{class:'tw'},h('table',null,h('thead',null,h('tr',null,h('th',null,'Produs'),h('th',{class:'num'},'Intrat'),h('th',{class:'num'},'Vândut'),h('th',{class:'num'},'Mostre'),h('th',{class:'num'},'Stoc'),h('th',null,'Stare'),h('th',null,''))),h('tbody',null,ps.map(p=>{let inn=0,sold=0,smp=0;for(const m of S.moves)if(m.productId===p.id)inn+=n2(m.qty);for(const s of S.sales)for(const l of s.lines||[])if(l.productId===p.id)sold+=n2(l.qty);for(const s of S.samples)if(s.productId===p.id)smp+=n2(s.qty||1);const sk=inn-sold-smp;const mn=n2(p.minStock);return h('tr',null,h('td',null,prodLabel(p)),h('td',{class:'num'},inn),h('td',{class:'num'},sold),h('td',{class:'num'},smp),h('td',{class:'num'},h('b',null,sk)),h('td',null,h('span',{class:'pill '+(sk<0?'bad':sk===0?'bad':mn&&sk<=mn?'warn':'good')},sk<0?'negativ':sk===0?'epuizat':mn&&sk<=mn?'sub minim':'ok')),h('td',null,h('button',{class:'b sm',onclick:()=>moveModal(p.id)},'+ intrare')));})))):h('div',{class:'panel empty'},'Niciun produs activ. Adaugă produsele din fila Produse & prețuri.');
+const hist=[...S.moves].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,40);
+const ht=h('div',{class:'panel'},h('h2',null,'Istoric intrări și corecții'),hist.length?h('div',{class:'tw',style:'margin-top:10px'},h('table',null,h('thead',null,h('tr',null,h('th',null,'Data'),h('th',null,'Produs'),h('th',{class:'num'},'Cantitate'),h('th',null,'Motiv'),h('th',null,'Cine'),h('th',null,''))),h('tbody',null,hist.map(m=>h('tr',null,h('td',null,fmtD(m.date)),h('td',null,pname(m.productId)),h('td',{class:'num '+(n2(m.qty)<0?'neg':'pos')},(n2(m.qty)>0?'+':'')+m.qty),h('td',{class:'wrapc'},m.reason+(m.note?' · '+m.note:'')),h('td',null,personName(m.by)),h('td',null,isAdmin?h('button',{class:'b sm danger',onclick:e=>confirmBtn(e.target,()=>guard(()=>db.doc('moves/'+m.id).delete(),'Șters'))},'Șterge'):null)))))):h('p',{class:'empty'},'Nicio intrare încă. Înregistrează prima recepție de marfă.'));
+return [head,k,t,ht];}
+function prodSelect(id,sel,filter){const ps=Object.values(S.products).filter(p=>p.active!==false&&(!filter||filter(p))).sort((a,b)=>prodLabel(a).localeCompare(prodLabel(b),'ro'));return h('select',{id},h('option',{value:''},'Alege produsul…'),ps.map(p=>h('option',{value:p.id,selected:p.id===sel},prodLabel(p)+' ('+stockOf(p.id)+' în stoc)')));}
+function moveModal(pid){const ps=prodSelect('m-p',pid);const q=h('input',{id:'m-q',type:'number',value:'10'});const r=h('select',{id:'m-r'},['Recepție marfă','Corecție inventar','Retur de la client','Produs deteriorat'].map(x=>h('option',null,x)));const d=h('input',{id:'m-d',type:'date',value:today()});const no=h('input',{id:'m-n',placeholder:'ex. factura nr., furnizor'});
+modal([h('h2',null,'Intrare marfă sau corecție'),h('p',{class:'note'},'Cantitate pozitivă pentru intrări, negativă pentru scăderi (ex. −2 la produs deteriorat).'),h('div',{class:'fgrid'},h('label',{class:'f',style:'grid-column:1/-1'},'Produs',ps),h('label',{class:'f'},'Cantitate',q),h('label',{class:'f'},'Motiv',r),h('label',{class:'f'},'Data',d)),h('label',{class:'f'},'Notă',no)],[h('button',{class:'b',onclick:close},'Renunță'),h('button',{class:'b pri',onclick:async()=>{if(!ps.value||!n2(q.value)){toast('Alege produsul și cantitatea.');return;}await guard(()=>db.collection('moves').add({productId:ps.value,qty:n2(q.value),reason:r.value,date:d.value||today(),note:no.value.trim(),by:me.id}),'Stoc actualizat');close();}},'Salvează')]);}
+
+// ---------- VÂNZĂRI ----------
+function vVanzari(){const list=S.sales.filter(s=>inMonth(s.date)&&match((S.clients[s.clientId]||{}).name||'',(s.lines||[]).map(l=>pname(l.productId)).join(' '),CH[s.channel]||'',s.note||'')).sort((a,b)=>(b.date||'').localeCompare(a.date||''));const a=monthAgg();
+const head=h('div',{class:'row between'},h('div',null,h('div',{class:'eyebrow'},'Transparență totală'),h('h1',null,'Vânzări'),h('p',{class:'sub'},'Fiecare comandă cu calculul ei complet. Comenzile de pe site și cele aduse de agent se împart '+set().shareSite+'/'+(100-set().shareSite)+(isAdmin?'; cele de pe eMAG rămân la Vivid Senses și nu le vede partenerul.':'.'))),h('div',{class:'row'},monthPicker(),h('button',{class:'b pri',onclick:()=>saleModal()},'Adaugă vânzare')));
+const sum=h('div',{class:'kpis'},[['Vânzări cu TVA',lei(a.gross)],['TVA de plată',lei(a.gross-a.net)],['Cost marfă',lei(a.cogs)],['Comisioane + transport',lei(a.fees+a.ship)],['Profit net',lei(a.np)],['Cotă partener',lei(a.partner),1],['Cotă Vivid Senses',lei(a.alex)]].map(([l,v,hl])=>h('div',{class:'kpi'+(hl?' hl':'')},h('span',{class:'l'},l),h('span',{class:'v'},v))));
+const t=list.length?h('div',{class:'tw'},h('table',null,h('thead',null,h('tr',null,['Data','Canal','Client','Produse','Vânzare','Cost marfă','Comis.+transp.','Profit net','Partener','Adăugat de',''].map((x,i)=>h('th',{class:i>=4&&i<=8?'num':null},x)))),h('tbody',null,list.map(s=>{const c=saleCalc(s);return h('tr',null,h('td',null,fmtD(s.date)),h('td',null,h('span',{class:'pill '+(s.channel==='agent'?'gold':'')},CH[s.channel]||s.channel)),h('td',null,(S.clients[s.clientId]||{}).name||'–'),h('td',{class:'wrapc'},(s.lines||[]).map(l=>l.qty+'× '+pname(l.productId)).join(', ')),h('td',{class:'num'},lei(c.gross)),h('td',{class:'num'},lei(c.cogs)),h('td',{class:'num'},lei(c.fees+c.ship)),h('td',{class:'num '+(c.np<0?'neg':'')},lei(c.np)),h('td',{class:'num'},lei(c.partner)),h('td',null,personName(s.by)),h('td',null,h('div',{class:'row',style:'flex-wrap:nowrap;gap:6px'},h('button',{class:'b sm',onclick:()=>saleModal(s)},'Detalii'))));})))):h('div',{class:'panel empty'},'Nicio vânzare în '+(month||'perioada aleasă')+'. Apasă „Adaugă vânzare”.');
+return [head,sum,t];}
+function saleModal(s,cid){const isNew=!s;s=s||{date:today(),channel:'agent',lines:[],ship:0};const editable=isNew||isAdmin||s.by===me.id;
+const d=h('input',{id:'s-d',type:'date',value:s.date});const ch=h('select',{id:'s-ch'},Object.entries(CH).filter(([k])=>isAdmin||k!=='emag').map(([k,l])=>h('option',{value:k,selected:s.channel===k},l)));const cl=h('select',{id:'s-cl'},h('option',{value:''},'Fără client din CRM'),Object.values(S.clients).sort((a,b)=>a.name.localeCompare(b.name,'ro')).map(c=>h('option',{value:c.id,selected:c.id===(s.clientId||cid)},c.name)));const sh=h('input',{id:'s-sh',type:'number',step:'0.01',value:s.ship||0});const no=h('input',{id:'s-no',value:s.note||'',placeholder:'nr. comandă, factură'});
+const lines=h('div',{class:'lines'});const calc=h('div',{class:'calc'});let L=(s.lines||[]).map(l=>({...l}));if(!L.length)L.push({productId:'',qty:1,unitPrice:0,unitCost:0});
+function drawLines(){lines.replaceChildren(...L.map((l,i)=>{const ps=prodSelect('s-p'+i,l.productId);const q=h('input',{type:'number',id:'s-q'+i,value:l.qty,min:'1'});const pr=h('input',{type:'number',id:'s-pr'+i,step:'0.01',value:l.unitPrice});ps.onchange=()=>{const p=S.products[ps.value];l.productId=ps.value;if(p){l.unitPrice=n2(p.price);l.unitCost=n2(p.cost);pr.value=l.unitPrice;}upd();};q.oninput=()=>{l.qty=n2(q.value);upd();};pr.oninput=()=>{l.unitPrice=n2(pr.value);upd();};return h('div',{class:'line'},h('label',{class:'f'},i?'':'Produs',ps),h('label',{class:'f'},i?'':'Buc.',q),h('label',{class:'f'},i?'':'Preț/buc cu TVA',pr),h('button',{class:'b sm',title:'Elimină rândul','aria-label':'Elimină rândul',onclick:()=>{L.splice(i,1);if(!L.length)L.push({productId:'',qty:1,unitPrice:0,unitCost:0});drawLines();upd();}},'×'));}));}
+function upd(){const c=saleCalc({channel:ch.value,ship:sh.value,lines:L});calc.replaceChildren(...[['Vânzare cu TVA',lei(c.gross,2)],['TVA',lei(c.vat,2)],['Cost marfă',lei(c.cogs,2)],[ch.value==='emag'?'Comision eMAG':'Comision plată',lei(c.fees,2)],['Profit net',lei(c.np,2)],['Partener ('+c.sh+'%)',lei(c.partner,2)],['Vivid Senses',lei(c.alex,2)]].map(([l,v])=>h('div',null,h('span',{class:'l'},l),h('b',null,v))));}
+ch.onchange=upd;sh.oninput=upd;drawLines();upd();
+const body=[h('h2',null,isNew?'Vânzare nouă':'Vânzare din '+fmtD(s.date)),h('div',{class:'fgrid'},h('label',{class:'f'},'Data',d),h('label',{class:'f'},'Canal',ch),h('label',{class:'f'},'Client',cl),h('label',{class:'f'},'Cost transport (lei)',sh)),lines,h('div',null,h('button',{class:'b sm',onclick:()=>{L.push({productId:'',qty:1,unitPrice:0,unitCost:0});drawLines();}},'+ încă un produs')),h('label',{class:'f'},'Notă',no),calc,h('p',{class:'note'},'Costul de achiziție se salvează odată cu vânzarea, ca o schimbare ulterioară de preț să nu modifice istoricul.'),s.by?h('p',{class:'note'},'Adăugată de '+personName(s.by)+'.'):null];
+modal(body,[!isNew&&isAdmin?h('button',{class:'b danger',onclick:e=>confirmBtn(e.target,async()=>{await guard(()=>db.doc((s._col||'sales')+'/'+s.id).delete(),'Vânzare ștearsă');close();})},'Șterge'):null,h('button',{class:'b',onclick:close},editable?'Renunță':'Închide'),editable?h('button',{class:'b pri',onclick:async()=>{const ok=L.filter(l=>l.productId&&n2(l.qty)>0);if(!ok.length){toast('Adaugă cel puțin un produs.');return;}const doc={date:d.value||today(),channel:ch.value,clientId:cl.value||null,ship:n2(sh.value),note:no.value.trim(),lines:ok.map(l=>({productId:l.productId,qty:n2(l.qty),unitPrice:n2(l.unitPrice),unitCost:n2(l.unitCost)})),by:s.by||me.id};const col=doc.channel==='emag'?'salesEmag':'sales';await guard(async()=>{if(isNew)await db.collection(col).add(doc);else if((s._col||'sales')===col)await db.doc(col+'/'+s.id).set(doc);else{await db.collection(col).add(doc);await db.doc((s._col||'sales')+'/'+s.id).delete();}},'Vânzare salvată');if(cl.value&&S.clients[cl.value]&&S.clients[cl.value].stage!=='client')await guard(()=>db.doc('clients/'+cl.value).update({stage:'client'}));close();}},'Salvează'):null]);}
+
+// ---------- CLIENȚI ----------
+let cStage='',cKind='',cView='tabel';try{cView=localStorage.getItem('vsp-cview')||'tabel';}catch(e){}
+const STG_PILL={prospect:'',mostra:'gold',followup:'warn',oferta:'warn',client:'good',pierdut:'bad'};
+const stLabel=k=>(STAGES.find(s=>s[0]===k)||[,'Prospect'])[1];
+function clientRev(id){return S.sales.filter(s=>s.clientId===id).reduce((x,s)=>x+saleCalc(s).gross,0);}
+function vClienti(){const all=Object.values(S.clients);const t=today();
+const cnt=k=>all.filter(c=>(c.stage||'prospect')===k).length;const rev=all.reduce((x,c)=>x+clientRev(c.id),0);
+const stat=(l,v,k,g)=>h('div',{class:'st'+(k!=null?' click':'')+(k!=null&&cStage===k?' on':''),tabindex:k!=null?'0':null,onclick:k!=null?()=>{cStage=cStage===k?'':k;render();}:null},h('span',{class:'l'},l),h('span',{class:'v'+(g?' g':'')},v));
+const stats=h('div',{class:'stats'},stat('Total clienți',all.length,''),stat('Prospecți',cnt('prospect'),'prospect'),stat('Mostră lăsată',cnt('mostra')+cnt('followup'),'mostra'),stat('Ofertă trimisă',cnt('oferta'),'oferta'),stat('Clienți activi',cnt('client'),'client',true),stat('Vânzări totale',lei(rev),null));
+const fb=h('div',{class:'fbar'},h('select',{id:'f-stage','aria-label':'Etapă',onchange:e=>{cStage=e.target.value;render();}},h('option',{value:''},'Toate etapele'),STAGES.map(([k,l])=>h('option',{value:k,selected:cStage===k},l))),h('select',{id:'f-kind','aria-label':'Tip client',onchange:e=>{cKind=e.target.value;render();}},h('option',{value:''},'Toate tipurile'),CKINDS.map(k=>h('option',{selected:cKind===k},k))),h('div',{class:'seg',role:'group','aria-label':'Afișare'},[['tabel','Tabel'],['kanban','Kanban']].map(([k,l])=>h('button',{'aria-pressed':String(cView===k),onclick:()=>{cView=k;try{localStorage.setItem('vsp-cview',k);}catch(e){}render();}},l))));
+let cs=all.filter(c=>(!cStage||(c.stage||'prospect')===cStage||(cStage==='mostra'&&c.stage==='followup'))&&(!cKind||c.kind===cKind)&&match(c.name,c.city,c.contact,c.phone,c.email,c.kind));
+if(!all.length)return [stats,h('div',{class:'panel empty'},'Niciun client încă. Apasă „+ Client nou” și adaugă prima firmă vizitată: hotel, clinică, showroom, birou.')];
+let body;
+if(cView==='kanban'){body=h('div',{class:'pipe'},STAGES.map(([k,l])=>{const items=cs.filter(c=>(c.stage||'prospect')===k).sort((a,b)=>(a.nextDate||'9').localeCompare(b.nextDate||'9'));return h('div',{class:'col'},h('h3',null,h('span',null,l),h('span',null,items.length)),items.map(c=>{const od=c.nextDate&&c.nextDate<t&&k!=='pierdut'&&k!=='client';const r=clientRev(c.id);return h('div',{class:'card',tabindex:'0',onclick:()=>clientModal(c),onkeydown:e=>{if(e.key==='Enter')clientModal(c);}},h('span',{class:'t'},c.name),h('span',{class:'m'},[c.kind,c.city].filter(Boolean).join(' · ')),c.nextDate?h('span',{class:'m'},h('span',{class:'pill '+(od?'bad':c.nextDate===t?'warn':'')},fmtD(c.nextDate)),' ',c.nextText||''):null,r?h('span',{class:'m'},'Vânzări: '+lei(r)):null);}));}));}
+else{cs.sort((a,b)=>(a.nextDate||'9').localeCompare(b.nextDate||'9'));body=cs.length?h('div',{class:'tw'},h('table',null,h('thead',null,h('tr',null,['Client','Tip','Oraș','Telefon','Etapă','Următorul pas','Mostre','Vânzări','Responsabil'].map((x,i)=>h('th',{class:i===6||i===7?'num':null},x)))),h('tbody',null,cs.map(c=>{const od=c.nextDate&&c.nextDate<t&&c.stage!=='pierdut'&&c.stage!=='client';const sm=S.samples.filter(s=>s.clientId===c.id).length;return h('tr',{class:'clk',tabindex:'0',onclick:()=>clientModal(c),onkeydown:e=>{if(e.key==='Enter')clientModal(c);}},h('td',{class:'cname'},h('b',null,c.name),c.contact?h('span',null,c.contact):null),h('td',null,c.kind||'–'),h('td',null,c.city||'–'),h('td',null,c.phone||'–'),h('td',null,h('span',{class:'pill '+(STG_PILL[c.stage||'prospect']||'')},stLabel(c.stage||'prospect'))),h('td',{class:'wrapc'},c.nextDate?h('span',{class:'pill '+(od?'bad':c.nextDate===t?'warn':'')},fmtD(c.nextDate)):'–',' ',c.nextText||''),h('td',{class:'num'},sm||'–'),h('td',{class:'num'},clientRev(c.id)?lei(clientRev(c.id)):'–'),h('td',null,personName(c.by)));})))):h('div',{class:'panel empty'},'Niciun client nu se potrivește cu filtrul.');}
+return [stats,fb,body];}
+function clientModal(c){const isNew=!c;c=c||{stage:'prospect',kind:'Hotel',notes:[]};const f={};const inp=(k,lab,type='text')=>{f[k]=h('input',{id:'c-'+k,type,value:c[k]||''});return h('label',{class:'f'},lab,f[k]);};f.kind=h('select',{id:'c-kind'},CKINDS.map(k=>h('option',{selected:c.kind===k},k)));
+let stage=c.stage||'prospect';const stg=h('div',{class:'stg',role:'group','aria-label':'Etapă'});const drawStg=()=>stg.replaceChildren(...STAGES.map(([k,l])=>h('button',{'aria-pressed':String(stage===k),onclick:()=>{stage=k;drawStg();}},l)));drawStg();
+const nt=h('textarea',{id:'c-note',placeholder:'Ce s-a discutat, ce urmează'});
+const tl=[];for(const x of c.notes||[])tl.push({d:x.d,k:'n',t:x.t,by:x.by});if(!isNew){for(const s of S.samples.filter(s=>s.clientId===c.id))tl.push({d:s.date,k:'s',t:'Mostră: '+pname(s.productId)+(s.outcome?' · '+s.outcome:''),by:s.by});for(const s of S.sales.filter(s=>s.clientId===c.id))tl.push({d:s.date,k:'v',t:'Comandă '+lei(saleCalc(s).gross)+' · '+(s.lines||[]).map(l=>l.qty+'× '+pname(l.productId)).join(', '),by:s.by});}tl.sort((a,b)=>(b.d||'').localeCompare(a.d||''));
+const r=isNew?0:clientRev(c.id);
+const body=[h('div',{class:'dhead'},h('div',null,h('div',{class:'eyebrow'},isNew?'Client nou':(c.kind||'Client')+(c.city?' · '+c.city:'')),h('div',{class:'t'},isNew?'Adaugă o firmă':c.name)),!isNew?h('div',{style:'text-align:right'},h('div',{class:'note'},'Vânzări'),h('b',null,lei(r))):null),
+h('div',null,h('div',{class:'note',style:'margin-bottom:6px'},'Etapă'),stg),
+h('div',{class:'fgrid'},inp('name','Firmă / nume'),h('label',{class:'f'},'Tip',f.kind),inp('city','Oraș'),inp('contact','Persoană de contact'),inp('phone','Telefon','tel'),inp('email','Email','email')),
+h('div',{class:'fgrid'},inp('nextDate','Următorul pas, data','date'),inp('nextText','Următorul pas, ce')),
+h('label',{class:'f'},'Adaugă o notă',nt),
+!isNew?h('div',{class:'row'},h('button',{class:'b sm',onclick:()=>{close();sampleModal(null,c.id);}},'+ Mostră'),h('button',{class:'b sm',onclick:()=>{close();saleModal(null,c.id);}},'+ Vânzare')):null,
+tl.length?h('div',null,h('div',{class:'note',style:'margin-bottom:8px'},'Istoric'),h('div',{class:'tl'},tl.map(x=>h('div',{class:'ti '+x.k},h('div',{class:'d'},fmtD(x.d)+' · '+personName(x.by)),h('div',null,x.t))))):null];
+modal(body,[!isNew&&isAdmin?h('button',{class:'b danger',onclick:e=>confirmBtn(e.target,async()=>{await guard(()=>db.doc('clients/'+c.id).delete(),'Client șters');close();})},'Șterge'):null,h('button',{class:'b',onclick:close},'Renunță'),h('button',{class:'b pri',onclick:async()=>{const d={};for(const k of['name','city','contact','phone','email','nextDate','nextText'])d[k]=f[k].value.trim();d.kind=f.kind.value;d.stage=stage;if(!d.name){toast('Scrie numele firmei.');return;}const ns=(c.notes||[]).slice();if(nt.value.trim())ns.push({d:today(),by:me.id,t:nt.value.trim()});d.notes=ns.slice(-200);d.by=c.by||me.id;d.created=c.created||today();await guard(()=>isNew?db.collection('clients').add(d):db.doc('clients/'+c.id).set(d),'Client salvat');close();}},'Salvează')]);}
+
+// ---------- RAPOARTE ----------
+function vRapoarte(){const months=[];const d0=new Date();d0.setDate(1);for(let i=11;i>=0;i--){const d=new Date(d0.getFullYear(),d0.getMonth()-i,1);months.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'));}
+const agg={};for(const m of months)agg[m]={g:0,np:0,p:0};const prod={};const byP={};const byC={};
+for(const s of S.sales){const m=(s.date||'').slice(0,7);const c=saleCalc(s);if(agg[m]){agg[m].g+=c.gross;agg[m].np+=c.np;agg[m].p+=c.partner;}for(const l of s.lines||[]){const p=prod[l.productId]||(prod[l.productId]={q:0,g:0});p.q+=n2(l.qty);p.g+=n2(l.qty)*n2(l.unitPrice);}const w=byP[s.by||'-']||(byP[s.by||'-']={n:0,g:0});w.n++;w.g+=c.gross;if(s.clientId){byC[s.clientId]=(byC[s.clientId]||0)+c.gross;}}
+// grafic: bare vânzări cu TVA + bară profit net, pe 12 luni
+const W=760,H=260,pl=56,pr=10,pt=14,pb=30;const mx=Math.max(1,...months.map(m=>agg[m].g));const nice=v=>{const p=Math.pow(10,Math.floor(Math.log10(v)));const r=v/p;return (r<=1?1:r<=2?2:r<=5?5:10)*p;};const top=nice(mx);const y=v=>pt+(H-pt-pb)*(1-v/top);const bw=(W-pl-pr)/12;
+let svg='<svg class="chart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Vânzări și profit net pe ultimele 12 luni">';for(let i=0;i<=4;i++){const v=top*i/4;svg+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y(v)+'" y2="'+y(v)+'" stroke="var(--line)"/><text x="'+(pl-8)+'" y="'+(y(v)+4)+'" text-anchor="end">'+Math.round(v).toLocaleString('ro-RO')+'</text>';}
+months.forEach((m,i)=>{const x=pl+i*bw;const a=agg[m];const w=bw*0.34;svg+='<rect x="'+(x+bw*0.14)+'" y="'+y(a.g)+'" width="'+w+'" height="'+(y(0)-y(a.g))+'" rx="2" fill="var(--gold)" opacity=".35"><title>'+m+': vânzări '+lei(a.g)+'</title></rect><rect x="'+(x+bw*0.14+w+2)+'" y="'+y(Math.max(0,a.np))+'" width="'+w+'" height="'+(y(0)-y(Math.max(0,a.np)))+'" rx="2" fill="var(--gold)"><title>'+m+': profit net '+lei(a.np)+'</title></rect><text x="'+(x+bw/2)+'" y="'+(H-10)+'" text-anchor="middle">'+new Date(m+'-15').toLocaleDateString('ro-RO',{month:'short'})+'</text>';});svg+='</svg>';
+const tot=months.reduce((t,m)=>({g:t.g+agg[m].g,np:t.np+agg[m].np,p:t.p+agg[m].p}),{g:0,np:0,p:0});
+const chart=h('div',{class:'panel'},h('div',{class:'row between'},h('h2',null,'Vânzări și profit net, ultimele 12 luni'),h('div',{class:'leg'},h('span',null,h('i',{style:'background:var(--gold);opacity:.35'}),'Vânzări cu TVA'),h('span',null,h('i',{style:'background:var(--gold)'}),'Profit net'))),h('div',{html:svg,style:'margin-top:8px;overflow-x:auto'}),h('p',{class:'note'},'Total 12 luni: '+lei(tot.g)+' vânzări · '+lei(tot.np)+' profit net · '+lei(tot.p)+' cota partenerului.'));
+const topP=Object.entries(prod).sort((a,b)=>b[1].g-a[1].g).slice(0,8);
+const tp=h('div',{class:'panel'},h('h2',null,'Cele mai vândute produse'),topP.length?h('div',{class:'tw',style:'margin-top:10px'},h('table',null,h('thead',null,h('tr',null,h('th',null,'Produs'),h('th',{class:'num'},'Buc.'),h('th',{class:'num'},'Vânzări'))),h('tbody',null,topP.map(([id,v])=>h('tr',null,h('td',null,pname(id)),h('td',{class:'num'},v.q),h('td',{class:'num'},lei(v.g))))))):h('p',{class:'empty'},'Apar după primele vânzări.'));
+const smp=S.samples.length,fu=S.samples.filter(s=>s.f0||s.f1||s.f2).length,won=S.samples.filter(s=>s.outcome==='comanda').length;
+const fun=h('div',{class:'panel'},h('h2',null,'De la mostră la comandă'),h('div',{class:'todo',style:'margin-top:10px'},[['Mostre date',smp],['Cu follow-up făcut',fu],['Transformate în comenzi',won]].map(([l,v])=>h('div',null,h('div',{class:'row between',style:'font-size:13px'},h('span',null,l),h('b',null,v)),h('div',{class:'bar'},h('i',{style:'width:'+(smp?v/smp*100:0)+'%'}))))),h('p',{class:'note',style:'margin-top:8px'},smp?'Conversie: '+pct(won/smp*100)+' (ținta din plan: 25%).':'Ținta din plan: 1 din 4 mostre devine comandă.'));
+const topC=Object.entries(byC).sort((a,b)=>b[1]-a[1]).slice(0,8);
+const tc=h('div',{class:'panel'},h('h2',null,'Clienți după vânzări'),topC.length?h('div',{class:'tw',style:'margin-top:10px'},h('table',null,h('tbody',null,topC.map(([id,v])=>h('tr',null,h('td',null,(S.clients[id]||{}).name||'–'),h('td',{class:'num'},lei(v))))))):h('p',{class:'empty'},'Apar când legi vânzările de clienți din CRM.'));
+const wp=h('div',{class:'panel'},h('h2',null,'Cine a adăugat vânzările'),Object.keys(byP).length?h('div',{class:'tw',style:'margin-top:10px'},h('table',null,h('tbody',null,Object.entries(byP).map(([id,v])=>h('tr',null,h('td',null,personName(id==='-'?null:id)),h('td',{class:'num'},v.n+' comenzi'),h('td',{class:'num'},lei(v.g))))))):h('p',{class:'empty'},'Nicio vânzare încă.'));
+return [chart,h('div',{class:'grid g2'},fun,tp,tc,wp)];}
+
+// ---------- MOSTRE ----------
+function vMostre(){const st=set();const all=[...S.samples].filter(s=>match((S.clients[s.clientId]||{}).name||'',pname(s.productId))).sort((a,b)=>(b.date||'').localeCompare(a.date||''));const target=n2(st.sampleTarget)||30;const given=S.samples.reduce((t,s)=>t+n2(s.qty||1),0);const won=S.samples.filter(s=>s.outcome==='comanda').length;const cost=S.samples.reduce((t,s)=>t+n2(s.qty||1)*n2(s.unitCost),0);
+const head=h('div',{class:'row between'},h('div',null,h('div',{class:'eyebrow'},'Mostre 125 ml gratuite'),h('h1',null,'Mostre și follow-up'),h('p',{class:'sub'},'Fiecare mostră primește automat trei pași: apel în ziua 3, vizită în ziua 10, decizie în ziua 21. Costul mostrelor îl suportă Vivid Senses.')),h('button',{class:'b pri',onclick:()=>sampleModal()},'Dă o mostră'));
+const k=h('div',{class:'kpis'},h('div',{class:'kpi'},h('span',{class:'l'},'Mostre date'),h('span',{class:'v'},given+' / '+target),h('div',{class:'bar',style:'margin-top:6px'},h('i',{style:'width:'+Math.min(100,given/target*100)+'%'}))),h('div',{class:'kpi hl'},h('span',{class:'l'},'Transformate în comenzi'),h('span',{class:'v'},won),h('span',{class:'n'},S.samples.length?pct(won/S.samples.length*100)+' din mostre':'')),h('div',{class:'kpi'},h('span',{class:'l'},'Cost mostre'),h('span',{class:'v'},lei(cost)),h('span',{class:'n'},'investiție Vivid Senses')),h('div',{class:'kpi'},h('span',{class:'l'},'Follow-up restante'),h('span',{class:'v'},fuDue().filter(d=>d.kind==='fu').length)));
+if(!all.length)return [head,k,h('div',{class:'panel empty'},'Nicio mostră dată încă. Când lași un difuzor de 125 ml la un client, înregistrează-l aici și primești automat pașii de follow-up.')];
+const t=today();const tb=h('div',{class:'tw'},h('table',null,h('thead',null,h('tr',null,h('th',null,'Data'),h('th',null,'Client'),h('th',null,'Produs'),...FU.map(f=>h('th',null,f[1])),h('th',null,'Rezultat'),h('th',null,'Cine'),h('th',null,''))),h('tbody',null,all.map(s=>h('tr',null,h('td',null,fmtD(s.date)),h('td',null,(S.clients[s.clientId]||{}).name||'–'),h('td',null,pname(s.productId)),...FU.map((f,i)=>{const due=addDays(s.date,f[0]);const done=!!s['f'+i];return h('td',null,h('button',{class:'b sm',title:f[2],onclick:()=>guard(()=>db.doc('samples/'+s.id).update({['f'+i]:done?null:today()}),done?'Debifat':'Bifat')},h('span',{class:'pill '+(done?'good':s.outcome?'':due<t?'bad':due===t?'warn':'')},done?'✓ '+fmtD(s['f'+i]):fmtD(due))));}),h('td',null,h('select',{'aria-label':'Rezultat',onchange:e=>guard(()=>db.doc('samples/'+s.id).update({outcome:e.target.value}),'Rezultat salvat')},[['','în curs'],['comanda','comandă'],['refuz','refuz'],['amanat','amânat']].map(([v,l])=>h('option',{value:v,selected:(s.outcome||'')===v},l)))),h('td',null,personName(s.by)),h('td',null,isAdmin?h('button',{class:'b sm danger',onclick:e=>confirmBtn(e.target,()=>guard(()=>db.doc('samples/'+s.id).delete(),'Mostră ștearsă'))},'Șterge'):null))))));
+return [head,k,tb,h('p',{class:'note'},'Apasă pe o dată ca s-o bifezi când pasul e făcut. Roșu înseamnă întârziat.')];}
+function sampleModal(_,clientId){const cl=h('select',{id:'sm-cl'},h('option',{value:''},'Alege clientul…'),Object.values(S.clients).sort((a,b)=>a.name.localeCompare(b.name,'ro')).map(c=>h('option',{value:c.id,selected:c.id===clientId},c.name)));const nw=h('input',{id:'sm-new',placeholder:'sau scrie un client nou'});const ps=prodSelect('sm-p','',p=>!p.size||p.size<=250);const d=h('input',{id:'sm-d',type:'date',value:today()});const q=h('input',{id:'sm-q',type:'number',value:'1',min:'1'});
+modal([h('h2',null,'Dă o mostră'),h('div',{class:'fgrid'},h('label',{class:'f'},'Client existent',cl),h('label',{class:'f'},'Client nou',nw),h('label',{class:'f',style:'grid-column:1/-1'},'Produs',ps),h('label',{class:'f'},'Data',d),h('label',{class:'f'},'Bucăți',q)),h('p',{class:'note'},'Se creează automat follow-up pentru ziua 3, 10 și 21, iar clientul trece în etapa „Mostră lăsată”.')],[h('button',{class:'b',onclick:close},'Renunță'),h('button',{class:'b pri',onclick:async()=>{if(!ps.value||(!cl.value&&!nw.value.trim())){toast('Alege clientul și produsul.');return;}let cid=cl.value;if(!cid){try{const r=await db.collection('clients').add({name:nw.value.trim(),kind:'Altele',stage:'mostra',notes:[],by:me.id,created:today(),nextDate:addDays(d.value||today(),3),nextText:'Apel follow-up mostră'});cid=r.id;}catch(e){toast('Nu s-a putut crea clientul.');return;}}else{await guard(()=>db.doc('clients/'+cid).update({stage:'mostra',nextDate:addDays(d.value||today(),3),nextText:'Apel follow-up mostră'}));}const p=S.products[ps.value];await guard(()=>db.collection('samples').add({clientId:cid,productId:ps.value,qty:n2(q.value)||1,unitCost:n2(p&&p.cost),date:d.value||today(),outcome:'',by:me.id}),'Mostră înregistrată');close();}},'Salvează')]);}
+
+// ---------- SETĂRI ----------
+function vSetari(){return [...vSetariBase(),vCont(),vUtilizatori()].filter(Boolean);}
+function vSetariBase(){const st=set();const f={};const inp=(k,lab,hint)=>{f[k]=h('input',{id:'st-'+k,type:'number',step:'0.1',value:st[k],disabled:!isAdmin});return h('label',{class:'f'},lab,f[k],hint?h('span',{class:'note'},hint):null);};
+return [h('div',null,h('div',{class:'eyebrow'},'Regulile calculului'),h('h1',null,'Setări'),h('p',{class:'sub'},isAdmin?'Le schimbi doar tu; partenerul le vede, ca să știe exact cum se calculează cota lui.':'Setările le modifică Alex. Le vezi aici ca să știi exact cum se calculează cota ta.')),
+h('div',{class:'panel'},h('h2',null,'Împărțirea profitului net'),h('div',{class:'fgrid',style:'margin-top:10px'},inp('shareSite','Comenzi de pe site, % partener'),inp('shareAgent','Comenzi aduse de agent, % partener'),isAdmin?inp('shareEmag','Comenzi eMAG, % partener'):null)),
+h('div',{class:'panel'},h('h2',null,'Taxe și costuri'),h('div',{class:'fgrid',style:'margin-top:10px'},inp('vat','TVA %'),inp('micro','Impozit micro %','din venitul fără TVA'),inp('divTax','Impozit dividende %','informativ'),inp('payFee','Comision plată card %','comenzi de pe site'),isAdmin?inp('emagFee','Comision eMAG %','la prețul cu TVA'):null,inp('sampleTarget','Ținta de mostre','buc.'))),
+isAdmin?h('div',{class:'row'},h('button',{class:'b pri',onclick:()=>{const d={};for(const k of Object.keys(f))d[k]=n2(f[k].value);guard(()=>db.doc('settings/main').set(d),'Setări salvate');}},'Salvează setările')):null,
+h('p',{class:'note'},'Cheltuielile cu mașina, combustibilul și mostrele le suportă Vivid Senses și nu se scad din cota partenerului.')];}
+
+// ---------- JURNAL (doar administrator) ----------
+let auditRows=null,auditUnsub=null;
+function vJurnal(){if(!isAdmin)return [h('div',{class:'panel empty'},'Jurnalul îl vede doar administratorul.')];
+if(!auditUnsub&&window.VSAdmin){auditUnsub=VSAdmin.auditFeed(r=>{auditRows=r;render();},e=>{console.warn(e);auditRows=[];render();});}
+const head=h('div',null,h('div',{class:'eyebrow'},'Cine a schimbat ce și când'),h('h1',null,'Jurnal'),h('p',{class:'sub'},'Fiecare adăugare, modificare și ștergere rămâne aici. Partenerul nu vede și nu poate șterge jurnalul.'));
+if(auditRows==null)return [head,h('div',{class:'panel empty'},'Se încarcă jurnalul…')];
+const rows=auditRows.filter(a=>match(a.path,a.action,a.data,personName(a.by)));
+const col=p=>({sales:'Vânzare',salesEmag:'Vânzare eMAG',clients:'Client',samples:'Mostră',moves:'Stoc',products:'Produs',settings:'Setări',users:'Utilizator'})[(p||'').split('/')[0]]||p;
+return [head,rows.length?h('div',{class:'tw'},h('table',null,h('thead',null,h('tr',null,['Când','Cine','Ce','Unde','Detalii'].map(x=>h('th',null,x)))),h('tbody',null,rows.map(a=>{const d=a.ts&&a.ts.toDate?a.ts.toDate():null;return h('tr',null,h('td',null,d?d.toLocaleString('ro-RO',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'acum'),h('td',null,personName(a.by)),h('td',null,h('span',{class:'pill '+(a.action==='șters'?'bad':a.action==='adăugat'?'good':'')},a.action)),h('td',null,col(a.path)),h('td',{class:'wrapc',style:'max-width:520px;font-size:12px;color:var(--muted)'},(a.data||'').slice(0,240)));})))):h('div',{class:'panel empty'},'Nicio modificare încă.')];}
+
+// ---------- CONT ȘI UTILIZATORI ----------
+let usersSnap=null,usersUnsub=null;
+function vCont(){const p1=h('input',{id:'cp1',type:'password',autocomplete:'new-password',placeholder:'minimum 8 caractere'});const nt=h('input',{id:'cnot',type:'checkbox',checked:me.notify!==false,style:'width:auto'});
+return h('div',{class:'panel'},h('h2',null,'Contul meu'),h('p',{class:'note'},me.email||''),
+h('label',{class:'row',style:'font-size:13.5px;margin-top:8px'},nt,'Primesc rezumatul zilnic pe email'),
+h('div',{class:'row',style:'margin-top:10px;align-items:end'},h('label',{class:'f',style:'flex:1;min-width:200px'},'Parolă nouă',p1),
+h('button',{class:'b',onclick:async()=>{if(p1.value.length<8){toast('Parola trebuie să aibă cel puțin 8 caractere.');return;}try{await VSAdmin.changePassword(p1.value);p1.value='';toast('Parola a fost schimbată');}catch(e){toast(e&&e.code==='auth/requires-recent-login'?'Ieși din cont, intră din nou și reîncearcă.':'Parola nu s-a schimbat.');}}},'Schimbă parola'),
+h('button',{class:'b',onclick:()=>guard(()=>db.doc('users/'+me.id).update({notify:nt.checked}),'Salvat')},'Salvează notificările')),
+h('div',{class:'row',style:'margin-top:12px'},h('button',{class:'b danger',onclick:()=>VSAdmin.logout()},'Ieși din cont')));}
+function vUtilizatori(){if(!isAdmin)return null;if(!usersUnsub&&window.VSAdmin){usersUnsub=VSAdmin.onUsers(m=>{usersSnap=Object.values(m);render();});}
+const nm=h('input',{id:'u-n',placeholder:'Nume'}),em=h('input',{id:'u-e',type:'email',placeholder:'email@exemplu.ro'}),pw=h('input',{id:'u-p',type:'text',placeholder:'parolă temporară, min. 8'}),rl=h('select',{id:'u-r'},h('option',{value:'partner'},'Partener'),h('option',{value:'admin'},'Administrator'));
+const list=(usersSnap||[]).sort((a,b)=>(a.name||'').localeCompare(b.name||'','ro'));
+return h('div',{class:'panel'},h('h2',null,'Utilizatori'),h('p',{class:'note'},'Partenerul adaugă și modifică, dar nu poate șterge nimic și nu vede eMAG, setările de editat sau jurnalul.'),
+list.length?h('div',{class:'tw',style:'margin-top:10px'},h('table',null,h('thead',null,h('tr',null,['Nume','Email','Rol','Activ','Email zilnic',''].map(x=>h('th',null,x)))),h('tbody',null,list.map(u=>{const self=u.id===me.id;return h('tr',null,h('td',null,u.name||'–'),h('td',null,u.email||'–'),h('td',null,h('select',{'aria-label':'Rol',disabled:self,onchange:e=>guard(()=>VSAdmin.setUser(u.id,{role:e.target.value}),'Rol schimbat')},[['partner','Partener'],['admin','Administrator']].map(([v,l])=>h('option',{value:v,selected:u.role===v},l)))),h('td',null,h('input',{type:'checkbox','aria-label':'Activ',checked:u.active!==false,disabled:self,style:'width:auto',onchange:e=>guard(()=>VSAdmin.setUser(u.id,{active:e.target.checked}),e.target.checked?'Cont activat':'Cont dezactivat')})),h('td',null,h('input',{type:'checkbox','aria-label':'Email zilnic',checked:u.notify!==false,style:'width:auto',onchange:e=>guard(()=>VSAdmin.setUser(u.id,{notify:e.target.checked}),'Salvat')})),h('td',null,h('button',{class:'b sm',onclick:()=>VSAdmin.resetPassword(u.email).then(()=>toast('Link de resetare trimis la '+u.email)).catch(()=>toast('Nu s-a putut trimite.'))},'Resetează parola')));})))):h('p',{class:'note'},'Se încarcă…'),
+h('h2',{style:'margin-top:16px;font-size:16px'},'Adaugă un utilizator'),h('div',{class:'fgrid',style:'margin-top:8px'},h('label',{class:'f'},'Nume',nm),h('label',{class:'f'},'Email',em),h('label',{class:'f'},'Parolă temporară',pw),h('label',{class:'f'},'Rol',rl)),
+h('div',{class:'row',style:'margin-top:10px'},h('button',{class:'b pri',onclick:async e=>{if(!nm.value.trim()||!em.value.trim()||pw.value.length<8){toast('Completează numele, emailul și o parolă de minimum 8 caractere.');return;}e.target.disabled=true;try{await VSAdmin.createUser({name:nm.value.trim(),email:em.value.trim(),password:pw.value,role:rl.value});toast('Cont creat. Trimite-i emailul și parola temporară.');nm.value=em.value=pw.value='';}catch(err){toast(err&&err.code==='auth/email-already-in-use'?'Există deja un cont cu acest email.':'Contul nu s-a creat.');}finally{e.target.disabled=false;}}},'Creează contul')));}
+
+// ---------- EXPORT EXCEL ȘI DECONT PDF ----------
+function xlsx(name,sheets){if(!window.XLSX){toast('Exportul nu s-a încărcat. Reîncarcă pagina.');return;}const wb=XLSX.utils.book_new();for(const s of sheets){const ws=XLSX.utils.aoa_to_sheet(s.rows);ws['!cols']=s.rows[0].map((_,i)=>({wch:Math.max(10,...s.rows.map(r=>String(r[i]??'').length).slice(0,200))+2}));XLSX.utils.book_append_sheet(wb,ws,s.name.slice(0,31));}XLSX.writeFile(wb,name+'.xlsx');}
+const r2=v=>Math.round(n2(v)*100)/100;
+function salesRows(list){const rows=[['Data','Canal','Client','Produse','Vânzare cu TVA','Fără TVA','Cost marfă','Comision','Transport','Impozit micro','Profit net','Cota partener','Cota Vivid Senses','Adăugat de','Notă']];for(const s of list){const c=saleCalc(s);rows.push([s.date,CH[s.channel]||s.channel,(S.clients[s.clientId]||{}).name||'',(s.lines||[]).map(l=>l.qty+'× '+pname(l.productId)).join(', '),r2(c.gross),r2(c.net),r2(c.cogs),r2(c.fees),r2(c.ship),r2(c.micro),r2(c.np),r2(c.partner),r2(c.alex),personName(s.by),s.note||'']);}return rows;}
+function exportVanzari(){const list=S.sales.filter(s=>inMonth(s.date)).sort((a,b)=>(a.date||'').localeCompare(b.date||''));const a=monthAgg();const rows=salesRows(list);rows.push([]);rows.push(['Total','','','',r2(a.gross),r2(a.net),r2(a.cogs),r2(a.fees),r2(a.ship),r2(a.micro),r2(a.np),r2(a.partner),r2(a.alex)]);xlsx('Vivid Senses vanzari '+(month||'toate'),[{name:'Vânzări '+(month||''),rows}]);}
+function exportClienti(){const rows=[['Client','Tip','Oraș','Contact','Telefon','Email','Etapă','Următorul pas','Data','Mostre','Vânzări cu TVA','Responsabil']];for(const c of Object.values(S.clients).sort((a,b)=>a.name.localeCompare(b.name,'ro')))rows.push([c.name,c.kind||'',c.city||'',c.contact||'',c.phone||'',c.email||'',stLabel(c.stage||'prospect'),c.nextText||'',c.nextDate||'',S.samples.filter(s=>s.clientId===c.id).length,r2(clientRev(c.id)),personName(c.by)]);xlsx('Vivid Senses clienti',[{name:'Clienți',rows}]);}
+function exportStoc(){const rows=[['Produs','SKU','Cost achiziție','Preț vânzare','Stoc','Valoare la achiziție','Valoare la vânzare']];for(const p of Object.values(S.products).sort((a,b)=>prodLabel(a).localeCompare(prodLabel(b),'ro'))){const sk=stockOf(p.id);rows.push([prodLabel(p),p.sku||'',r2(p.cost),r2(p.price),sk,r2(Math.max(0,sk)*n2(p.cost)),r2(Math.max(0,sk)*n2(p.price))]);}xlsx('Vivid Senses stoc '+today(),[{name:'Stoc',rows}]);}
+function printDecont(){const list=S.sales.filter(s=>inMonth(s.date)&&s.channel!=='emag').sort((a,b)=>(a.date||'').localeCompare(b.date||''));let np=0,pt=0,g=0;const st=set();
+const ml=month?new Date(month+'-15').toLocaleDateString('ro-RO',{month:'long',year:'numeric'}):'toată perioada';
+const pr=$('#print');pr.replaceChildren(h('div',{class:'ph'},h('div',null,h('div',{class:'pt'},'Decont lunar'),h('div',null,'Asocierea în participațiune Vivid Senses · '+ml)),h('div',{style:'text-align:right'},'ETONDALE 2017 SRL',h('br'),'CUI RO37488718')),
+h('table',null,h('thead',null,h('tr',null,['Data','Canal','Client','Produse','Vânzare','Profit net','Cota partener'].map(x=>h('th',null,x)))),h('tbody',null,list.map(s=>{const c=saleCalc(s);np+=c.np;pt+=c.partner;g+=c.gross;return h('tr',null,h('td',null,fmtD(s.date)),h('td',null,CH[s.channel]),h('td',null,(S.clients[s.clientId]||{}).name||'–'),h('td',null,(s.lines||[]).map(l=>l.qty+'× '+pname(l.productId)).join(', ')),h('td',{class:'num'},lei(c.gross,2)),h('td',{class:'num'},lei(c.np,2)),h('td',{class:'num'},lei(c.partner,2)));})),
+h('tfoot',null,h('tr',null,h('td',{colspan:'4'},'Total'),h('td',{class:'num'},lei(g,2)),h('td',{class:'num'},lei(np,2)),h('td',{class:'num'},lei(Math.max(0,pt),2))))),
+h('p',null,'Cota partenerului se calculează conform contractului de asociere în participațiune ('+st.shareSite+'% din profitul net al comenzilor de pe site și al celor aduse de partener). '+(pt<0?'Rezultatul lunii este negativ: pierderea se reportează în luna următoare. ':'')+'Impozitul aferent se reține de ETONDALE 2017 SRL la plată.'),
+h('div',{class:'sig'},h('div',null,'Asociatul administrator',h('br'),'ETONDALE 2017 SRL'),h('div',null,'Asociatul',h('br'),'Nume și semnătură')));
+setTimeout(()=>window.print(),50);}
+
+// ---------- modal ----------
+let lastFocus=null;
+function modal(body,actions){lastFocus=document.activeElement;const ov=h('div',{class:'ov',onclick:e=>{if(e.target===ov)close();}},h('div',{class:'modal',role:'dialog','aria-modal':'true'},...body,h('div',{class:'row acts',style:'justify-content:flex-end'},actions.filter(Boolean))));$('#ovroot').replaceChildren(ov);const first=ov.querySelector('input,select,textarea');if(first)first.focus();}
+function close(){$('#ovroot').replaceChildren();if(lastFocus&&lastFocus.focus)lastFocus.focus();}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#ovroot').firstChild)close();});
+function confirmBtn(btn,fn){if(btn.dataset.armed){fn();return;}btn.dataset.armed='1';const t=btn.textContent;btn.textContent='Sigur? Apasă din nou';setTimeout(()=>{if(btn.isConnected){delete btn.dataset.armed;btn.textContent=t;}},3500);}
+
+// ---------- boot ----------
+renderNav();
+(async()=>{
+  try{user=await window.claude?.use?.('user');}catch(e){}
+  try{db=await window.claude?.use?.('db');}catch(e){}
+  if(user){try{me=await user.me();isAdmin=!!me.canEdit||!!me.isOwner;const w=$('#who');w.replaceChildren(h('img',{src:me.avatarUrl,alt:''}),h('div',null,h('b',null,me.name||'Tu'),isAdmin?'Administrator':'Partener',' · ',h('a',{href:'#',style:'color:var(--side-gold)',onclick:e=>{e.preventDefault();VSAdmin.logout();}},'Ieși')));renderNav();}catch(e){}}
+  if(!db){$('#main').replaceChildren(h('div',{class:'panel empty'},'Nu mă pot conecta la baza de date. Verifică internetul și reîncarcă pagina.'));return;}
+  const sub=(path,fn)=>db.collection(path).onSnapshot(snap=>{fn(snap);S.loaded[path]=1;resolvePeople().then(render);render();},e=>console.warn(path,e));
+  sub('products',s=>{S.products={};for(const d of s.docs)S.products[d.id]={id:d.id,...d.data()};});
+  sub('moves',s=>{S.moves=s.docs.map(d=>({id:d.id,...d.data()}));});
+  const mergeSales=()=>{S.sales=[...(S.salesMain||[]),...(S.salesEmag||[])];};sub('sales',s=>{S.salesMain=s.docs.map(d=>({id:d.id,_col:'sales',...d.data()}));mergeSales();});if(isAdmin)sub('salesEmag',s=>{S.salesEmag=s.docs.map(d=>({id:d.id,_col:'salesEmag',...d.data()}));mergeSales();});
+  sub('clients',s=>{S.clients={};for(const d of s.docs)S.clients[d.id]={id:d.id,...d.data()};});
+  sub('samples',s=>{S.samples=s.docs.map(d=>({id:d.id,...d.data()}));});
+  db.doc('settings/main').onSnapshot(d=>{S.settings=d.exists?{...DEF,...d.data()}:{...DEF};render();},e=>console.warn(e));
+  render();
+})();
+})();
+</script>
+<script type="module" src="firebase-bridge.js"></script>
+</body>
+</html>

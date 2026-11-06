@@ -1,0 +1,25 @@
+name: Rezumat zilnic pe email
+
+on:
+  schedule:
+    # 06:10 UTC = 08:10 ora României iarna (09:10 vara), de luni până sâmbătă
+    - cron: "10 6 * * 1-6"
+  workflow_dispatch: {}
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install --no-audit --no-fund
+        working-directory: scripts
+      - run: node digest.mjs
+        working-directory: scripts
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          MAIL_FROM: ${{ vars.MAIL_FROM }}
+          APP_URL: ${{ vars.APP_URL }}
