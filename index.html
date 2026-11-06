@@ -267,13 +267,13 @@ body.locked .app{display:none}
 <div id="ovroot"></div>
 
 <div id="print"></div>
-<script src="config.js?v=20261106c"></script>
+<script src="config.js?v=20261106d"></script>
 <script>window.__vsBridge={};(function(){var p={};['user','db'].forEach(function(k){p[k]=new Promise(function(r){window.__vsBridge[k]=r;});});window.claude={use:function(n){return p[n]||Promise.resolve(null);}};})();</script>
 <script>
 (() => {
 const DEF = {vat:21, micro:1, divTax:16, shareSite:50, shareAgent:50, shareEmag:0, payFee:1.9, emagFee:21, sampleTarget:30};
 const CH = {site:'Site vividsenses.ro', agent:'Agent (teren)', emag:'eMAG'};
-const KINDS = ['Difuzor','Rezervă','Spray','Set cadou','Săculeț auto','Lumânare','Altele'];
+const KINDS = ['Difuzor','Rezervă','Spray','Set cadou','Săculeț auto','Parfum rufe','Săpun lichid','Lumânare','Altele'];
 const SIZES = [125,250,500,1000,2500,5000];
 const STAGES = [['prospect','Prospect'],['mostra','Mostră lăsată'],['followup','Follow-up'],['oferta','Ofertă trimisă'],['client','Client activ'],['pierdut','Pierdut']];
 const CKINDS = ['Hotel','Pensiune','Restaurant / cafenea','Clinică / cabinet','Showroom auto','Birouri','Salon / spa','Magazin','Persoană fizică','Altele'];
@@ -357,24 +357,31 @@ const wb=XLSX.utils.book_new();const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols'
 const normK=x=>String(x??'').trim().toLowerCase();
 const numIn=x=>{if(x==null||x==='')return null;if(typeof x==='number')return x;const v=parseFloat(String(x).replace(/\s/g,'').replace(/lei|ron/ig,'').replace(/\.(?=\d{3}(\D|$))/g,'').replace(',','.'));return isFinite(v)?v:null;};
 function impParse(rows){if(!rows.length)return {items:[],kind:'gol'};const keys=Object.keys(rows[0]).map(normK);const get=(r,...names)=>{for(const n of names){const k=Object.keys(r).find(k=>normK(k)===normK(n));if(k!=null&&r[k]!==''&&r[k]!=null)return r[k];}return null;};
-if(keys.includes('handle')&&keys.includes('variant price')){const titles={},vendors={},types={};const items=[];
- rows.forEach(r=>{const hd=get(r,'Handle');if(!hd)return;if(get(r,'Title'))titles[hd]=get(r,'Title');if(get(r,'Vendor'))vendors[hd]=get(r,'Vendor');if(get(r,'Type','Product Type'))types[hd]=get(r,'Type','Product Type');const price=numIn(get(r,'Variant Price'));if(price==null)return;
- const opt=[get(r,'Option1 Value'),get(r,'Option2 Value'),get(r,'Option3 Value')].filter(Boolean).map(String);const so=opt.find(o=>/\d+\s*ml/i.test(o))||String(titles[hd]||'').match(/\d+\s*ml/i)?.[0]||'';const size=numIn((so.match(/\d+[.,]?\d*/)||[''])[0]);
- const extra=opt.filter(o=>o!==so&&!/^default title$/i.test(o));const status=normK(get(r,'Status'));
- items.push({line:String(vendors[hd]||'Vivid Senses').trim(),name:(String(titles[hd]||hd).replace(/\s*[-–·]?\s*\d+\s*ml\b/i,'').trim()+(extra.length?' · '+extra.join(' · '):'')),kind:guessKind(types[hd]||titles[hd]),size:size||null,cost:numIn(get(r,'Cost per item')),price,stock:numIn(get(r,'Variant Inventory Qty','Inventory Available: Shop location','On hand')),minStock:null,sku:String(get(r,'Variant SKU')||'').trim(),active:status?status==='active':true});});
- return {items,kind:'Shopify'};}
+if(keys.includes('handle')){const titles={},vendors={};const items=[];const isInv=keys.includes('on hand (current)')||keys.includes('available (not editable)');
+ rows.forEach(r=>{const hd=String(get(r,'Handle')||'').trim();if(!hd)return;if(get(r,'Title'))titles[hd]=String(get(r,'Title'));if(get(r,'Vendor'))vendors[hd]=String(get(r,'Vendor'));
+ const o1=String(get(r,'Option1 Value')||'').trim();const price=numIn(get(r,'Variant Price'));const stock=numIn(get(r,'On hand (current)','Variant Inventory Qty','Available (not editable)'));
+ if(!o1&&price==null&&stock==null)return;const title=titles[hd]||hd;const opt=/^default title$/i.test(o1)?'':o1;
+ const pt=parseShopTitle(title,hd,vendors[hd]);const sz=(opt.match(/(\d+[.,]?\d*)\s*ml/i)||title.match(/(\d+[.,]?\d*)\s*ml/i)||hd.match(/(\d+)\s*-?ml/i)||[])[1];
+ const status=normK(get(r,'Status'));items.push({shop:hd+'|'+opt,line:pt.line,name:pt.name+(opt&&!/ml/i.test(opt)?' · '+opt:''),kind:pt.kind,size:numIn(sz),cost:numIn(get(r,'Cost per item')),price,stock,minStock:null,sku:String(get(r,'SKU','Variant SKU')||'').trim(),active:status?status==='active':true});});
+ return {items,kind:isInv?'Shopify (inventar)':'Shopify (produse)'};}
 const items=rows.map(r=>({line:String(get(r,'Brand','Linie','Brand / linie')||'').trim(),name:String(get(r,'Aromă','Aroma','Nume','Produs')||'').trim(),kind:String(get(r,'Tip')||'Difuzor').trim(),size:numIn(get(r,'Mărime (ml)','Mărime','Marime','ml')),cost:numIn(get(r,'Preț achiziție fără TVA','Pret achizitie','Achiziție','Cost')),price:numIn(get(r,'Preț vânzare cu TVA','Pret vanzare','Vânzare','Preț')),stock:numIn(get(r,'Stoc actual','Stoc')),minStock:numIn(get(r,'Stoc minim')),sku:String(get(r,'SKU','Cod')||'').trim(),active:true})).filter(x=>x.name);
 return {items,kind:'model'};}
+function parseShopTitle(t,hd,vendor){t=String(t||'').replace(/\s+/g,' ').trim();hd=String(hd||'');let kind='Difuzor';
+ if(/^rezerv/i.test(t))kind='Rezervă';else if(/^set cadou/i.test(t))kind='Set cadou';else if(/rufe/i.test(t))kind='Parfum rufe';else if(/s[ăa]cule[țt]/i.test(t))kind='Săculeț auto';else if(/s[ăa]pun/i.test(t))kind='Săpun lichid';else if(/^parfum-spray-camera|^parfum-pentru-camera/.test(hd)||/spray/i.test(t))kind='Spray';
+ let n=t.replace(/[,–-]\s*\d+[.,]?\d*\s*ml\s*$/i,'').replace(/\s*\d+[.,]?\d*\s*ml\s*$/i,'');
+ n=n.replace(/^rezerv[ăa] parfum\s*[–-]\s*/i,'').replace(/^set cadou\s*[–-]\s*/i,'').replace(/^parfum spray camer[ăa]\s*/i,'').replace(/^parfum pentru camer[ăa]\s*/i,'').replace(/^set parfum de rufe concentrat erbal\s*[–-]\s*/i,'');
+ n=n.replace(/\s*[–-]\s*(parfum de camer[ăa]|parfum pentru rufe|s[ăa]cule[țt] parfumat auto)\s*$/i,'').replace(/\s*\(.*\)\s*$/,'').replace(/[\s,–-]+$/,'').trim();
+ const line=vendor&&vendor.trim()?vendor.trim():/erbal/i.test(t)?'Erbal':/s[ăa]pun/i.test(t)?'Diverse':'Locherber Milano';return {line,name:n||t,kind};}
 function guessKind(t){t=normK(t);if(/rezerv|refill/.test(t))return 'Rezervă';if(/spray/.test(t))return 'Spray';if(/set|cadou|gift/.test(t))return 'Set cadou';if(/auto|car|săcule|sacule/.test(t))return 'Săculeț auto';if(/lum[aâ]n|candle/.test(t))return 'Lumânare';return 'Difuzor';}
 const pKey=p=>[normK(p.line),normK(p.name),normK(p.kind),String(n2(p.size)||'')].join('|');
 function importModal(){const file=h('input',{type:'file',accept:'.xlsx,.xls,.csv'});const prev=h('div',{class:'note'},'Alege un fișier Excel sau CSV.');let plan=null;const go=h('button',{class:'b pri',disabled:true},'Importă');
-file.addEventListener('change',async()=>{const fl=file.files[0];if(!fl)return;if(!window.XLSX){toast('Reîncarcă pagina.');return;}try{const wb=XLSX.read(await fl.arrayBuffer());const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});const {items,kind}=impParse(rows);
- const ex={};Object.values(S.products).forEach(p=>ex[pKey(p)]=p);const seen=new Set();plan=[];items.forEach(it=>{const k=pKey(it);if(seen.has(k))return;seen.add(k);plan.push({it,old:ex[k]||null});});
+file.addEventListener('change',async()=>{const fl=file.files[0];if(!fl)return;if(!window.XLSX){toast('Reîncarcă pagina.');return;}try{const wb=/\.(csv|txt)$/i.test(fl.name)?XLSX.read((await fl.text()).replace(/^\uFEFF/,''),{type:'string'}):XLSX.read(await fl.arrayBuffer());const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});const {items,kind}=impParse(rows);
+ const ex={},exS={};Object.values(S.products).forEach(p=>{ex[pKey(p)]=p;if(p.shop)exS[p.shop]=p;});const seen=new Set();plan=[];items.forEach(it=>{const k=it.shop||pKey(it);if(seen.has(k))return;seen.add(k);const old=(it.shop&&exS[it.shop])||ex[pKey(it)]||null;if(old&&plan.some(x=>x.old===old))return;plan.push({it,old});});
  const nNew=plan.filter(x=>!x.old).length,nUpd=plan.length-nNew,nSt=plan.filter(x=>x.it.stock!=null).length,noPrice=plan.filter(x=>!(x.it.price>0)&&!(x.old&&x.old.price>0)).length,noCost=plan.filter(x=>!(x.it.cost>0)&&!(x.old&&x.old.cost>0)).length;
  prev.replaceChildren(...[h('p',null,h('b',null,'Fișier recunoscut: '+(kind==='Shopify'?'export Shopify':kind==='model'?'model Vivid Senses':kind)+'. ')),h('p',null,nNew+' produse noi · '+nUpd+' actualizate'+(nSt?' · stoc setat la '+nSt:'')),noCost?h('p',{style:'color:var(--warn,#a66b00)'},noCost+' fără preț de achiziție (Shopify nu îl are mereu) — le completezi după, în tabel.'):null,noPrice?h('p',{style:'color:var(--warn,#a66b00)'},noPrice+' fără preț de vânzare.'):null,
  h('div',{class:'tw',style:'max-height:260px;overflow:auto;margin-top:8px'},h('table',null,h('thead',null,h('tr',null,['Produs','Achiziție','Vânzare','Stoc',''].map(x=>h('th',null,x)))),h('tbody',null,plan.slice(0,200).map(({it,old})=>h('tr',null,h('td',null,[it.line,it.name,it.kind,it.size?it.size+' ml':''].filter(Boolean).join(' · ')),h('td',null,it.cost!=null?lei(it.cost,2):'–'),h('td',null,it.price!=null?lei(it.price,2):'–'),h('td',null,it.stock!=null?String(it.stock):'–'),h('td',null,h('span',{class:'pill '+(old?'':'good')},old?'actualizat':'nou')))))))].filter(Boolean));
  go.disabled=!plan.length;}catch(e){console.error(e);prev.textContent='Nu am putut citi fișierul. Salvează-l ca .xlsx sau .csv și încearcă din nou.';go.disabled=true;}});
-go.addEventListener('click',async()=>{if(!plan)return;go.disabled=true;let k=0;try{for(const {it,old} of plan){let id;const base={line:it.line,name:it.name,kind:it.kind,size:it.size||null,updated:today()};
+go.addEventListener('click',async()=>{if(!plan)return;go.disabled=true;let k=0;try{for(const {it,old} of plan){let id;const base=old?{updated:today()}:{line:it.line,name:it.name,kind:it.kind,size:it.size||null,updated:today()};if(it.shop)base.shop=it.shop;
  if(old){id=old.id;const d={...old,...base};delete d.id;if(it.cost!=null&&it.cost>0)d.cost=it.cost;if(it.price!=null&&it.price>0)d.price=it.price;if(it.minStock!=null)d.minStock=it.minStock;if(it.sku)d.sku=it.sku;await db.doc('products/'+id).set(d);}
  else{const r=await db.collection('products').add({...base,cost:it.cost||0,price:it.price||0,minStock:it.minStock||0,sku:it.sku||'',active:it.active!==false,created:today()});id=r.id;}
  if(it.stock!=null){const cur=old?stockOf(old.id):0;const diff=Math.round((it.stock-cur)*100)/100;if(diff)await db.collection('moves').add({productId:id,qty:diff,reason:'Corecție inventar',date:today(),note:old?'Import: stoc aliniat la '+it.stock:'Stoc inițial (import)',by:me.id});}
@@ -545,6 +552,6 @@ renderNav();
 })();
 })();
 </script>
-<script type="module" src="firebase-bridge.js?v=20261106c"></script>
+<script type="module" src="firebase-bridge.js?v=20261106d"></script>
 </body>
 </html>
