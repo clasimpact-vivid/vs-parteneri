@@ -19,11 +19,12 @@ const usersListeners = new Set();
 // ---------- ecranul de login ----------
 const login = $('#login');
 const lf = $('#lf'), le = $('#l-email'), lp = $('#l-pass'), lmsg = $('#l-msg');
+try { const le0 = localStorage.getItem('vs-last-email'); if (le0) { le.value = le0; setTimeout(() => lp.focus(), 50); } } catch (e) {}
 function msg(t, ok) { lmsg.textContent = t || ''; lmsg.className = 'lmsg' + (ok ? ' ok' : ''); }
 lf.addEventListener('submit', async e => {
   e.preventDefault(); msg('');
   const b = $('#l-btn'); b.disabled = true;
-  try { await signInWithEmailAndPassword(auth, le.value.trim(), lp.value); }
+  try { await signInWithEmailAndPassword(auth, le.value.trim(), lp.value); try { localStorage.setItem('vs-last-email', le.value.trim()); } catch (e) {} }
   catch (err) {
     msg(err.code === 'auth/too-many-requests' ? 'Prea multe încercări. Încearcă din nou peste câteva minute.'
       : 'Email sau parolă greșită.');
