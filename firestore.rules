@@ -10,7 +10,7 @@ service cloud.firestore {
     function userDoc() { return get(/databases/$(database)/documents/users/$(request.auth.uid)); }
     function hasUser() { return exists(/databases/$(database)/documents/users/$(request.auth.uid)); }
     // Aceleași emailuri ca în config.js → adminEmails
-    function isAdminEmail() { return request.auth.token.email in ['clasimpact@gmail.com']; }
+    function isAdminEmail() { return request.auth.token.email in ['alexandru@vividsenses.ro']; }
     function isAdmin() { return signedIn() && (isAdminEmail() || (hasUser() && userDoc().data.role == 'admin' && userDoc().data.active != false)); }
     function isMember() { return signedIn() && (isAdmin() || (hasUser() && userDoc().data.active != false)); }
     function keepsAuthor() { return request.resource.data.by == resource.data.by; }

@@ -10,6 +10,6 @@ window.VS_CONFIG = {
     appId: "1:403403243273:web:75b4c11714b45fc4d51dd8"
   },
   // Emailurile care devin automat administratori la prima intrare. Trebuie să fie aceleași ca în firestore.rules.
-  adminEmails: ["clasimpact@gmail.com"],
+  adminEmails: ["alexandru@vividsenses.ro"],
   adminName: "Alex"
 };

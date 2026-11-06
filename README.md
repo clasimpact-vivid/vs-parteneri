@@ -20,7 +20,7 @@ Rulează pe **GitHub Pages** (paginile), **Firebase Authentication** (conturi) �
 ### 1. Firebase
 1. [console.firebase.google.com](https://console.firebase.google.com) → proiectul `vivid-senses-parteneri`.
 2. **Authentication → Sign-in method → Email/Password → Enable**.
-3. **Authentication → Users → Add user**: creează **întâi contul tău** (`clasimpact@gmail.com` + o parolă). Așa nimeni altcineva nu-și poate face cont cu adresa de administrator.
+3. **Authentication → Users → Add user**: creează **întâi contul tău** (`alexandru@vividsenses.ro` + o parolă). Așa nimeni altcineva nu-și poate face cont cu adresa de administrator.
 4. **Firestore Database → Rules**: șterge tot, lipește conținutul din `firestore.rules`, apasă **Publish**.
 5. **Project settings → Your apps → Web app**: copiază valorile din `firebaseConfig` în `config.js`.
 
