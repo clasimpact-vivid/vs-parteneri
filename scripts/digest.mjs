@@ -65,13 +65,15 @@ function render(u) {
   const rows = ySales.map(s => { const c = saleCalc(s); return `<tr><td>${esc(CH[s.channel] || s.channel)}</td><td>${esc((C[s.clientId] || {}).name || '–')}</td><td>${esc((s.lines || []).map(l => l.qty + '× ' + pname(l.productId)).join(', '))}</td><td align="right">${lei(c.gross)}</td><td align="right">${lei(isAdmin ? c.np : c.partner)}</td></tr>`; }).join('');
   const tot = ySales.reduce((t, s) => { const c = saleCalc(s); return { g: t.g + c.gross, p: t.p + (isAdmin ? c.np : c.partner) }; }, { g: 0, p: 0 });
   const tk = tasks.slice(0, 30).map(t => `<li>${t.due < today ? '<b style="color:#b4413a">întârziat</b> · ' : ''}${esc(t.text)}</li>`).join('');
-  if (!tasks.length && !ySales.length && !(isAdmin && low.length)) return null;
+  const test = !!process.env.TEST_ONLY_ADMIN && isAdmin;
+  if (!test && !tasks.length && !ySales.length && !(isAdmin && low.length)) return null;
   const sec = (t, b) => `<h3 style="font-family:Georgia,serif;font-weight:500;margin:22px 0 8px">${t}</h3>${b}`;
   return `<div style="font-family:Helvetica,Arial,sans-serif;color:#1b1916;max-width:620px">
   <div style="background:#0e0d0c;color:#c9a85f;padding:16px 20px;font-family:Georgia,serif;font-size:20px">Vivid Senses <span style="color:#e9e2d4">· rezumatul zilei</span></div>
   <div style="padding:4px 20px 20px">
   ${tasks.length ? sec(`De făcut azi (${tasks.length})`, `<ul style="padding-left:18px;line-height:1.6">${tk}</ul>`) : ''}
   ${ySales.length ? sec(`Vânzările de ieri: ${lei(tot.g)}`, `<table cellpadding="6" style="border-collapse:collapse;font-size:13px;width:100%"><tr style="background:#efede8"><th align="left">Canal</th><th align="left">Client</th><th align="left">Produse</th><th align="right">Vânzare</th><th align="right">${isAdmin ? 'Profit net' : 'Cota ta'}</th></tr>${rows}</table><p style="font-size:13px">${isAdmin ? 'Profit net' : 'Cota ta'} ieri: <b>${lei(tot.p)}</b></p>`) : ''}
+  ${test && !tasks.length && !ySales.length && !low.length ? sec('Email de test', '<p>Totul e legat corect. Azi nu e nimic de făcut, iar ieri nu au fost vânzări. Dimineața primești emailul doar când e ceva de urmărit.</p>') : ''}
   ${isAdmin && low.length ? sec('Stoc sub minim', `<ul style="padding-left:18px">${low.map(p => `<li>${esc(pname(p.id))}: ${stockOf(p.id)} buc.</li>`).join('')}</ul>`) : ''}
   <p style="margin-top:24px"><a href="${esc(process.env.APP_URL || '#')}" style="background:#c9a85f;color:#14120f;padding:10px 16px;text-decoration:none;border-radius:6px;font-weight:600">Deschide aplicația</a></p>
   </div></div>`;
@@ -80,6 +82,7 @@ function render(u) {
 let sent = 0;
 for (const u of users) {
   if (u.active === false || u.notify === false || !u.email) continue;
+  if (process.env.TEST_ONLY_ADMIN && u.role !== 'admin') continue;
   const html = render(u);
   if (!html) continue;
   const subject = `Vivid Senses · ${tasks.length} de făcut azi`;

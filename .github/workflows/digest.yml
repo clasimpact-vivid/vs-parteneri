@@ -4,7 +4,12 @@ on:
   schedule:
     # 06:10 UTC = 08:10 ora României iarna (09:10 vara), de luni până sâmbătă
     - cron: "10 6 * * 1-6"
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      test:
+        description: "Test: trimite doar administratorului, chiar dacă nu e nimic de făcut"
+        type: boolean
+        default: true
 
 jobs:
   digest:
@@ -23,3 +28,4 @@ jobs:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           MAIL_FROM: ${{ vars.MAIL_FROM }}
           APP_URL: ${{ vars.APP_URL }}
+          TEST_ONLY_ADMIN: ${{ github.event_name == 'workflow_dispatch' && inputs.test && '1' || '' }}
