@@ -276,7 +276,7 @@ body.locked .app{display:none}
 <div id="ovroot"></div>
 
 <div id="print"></div>
-<script src="config.js?v=20261106f"></script>
+<script src="config.js?v=20261106g"></script>
 <script>window.__vsBridge={};(function(){var p={};['user','db'].forEach(function(k){p[k]=new Promise(function(r){window.__vsBridge[k]=r;});});window.claude={use:function(n){return p[n]||Promise.resolve(null);}};})();</script>
 <script>
 (() => {
@@ -330,7 +330,7 @@ const ONLINE_MS=150000;let presOn=null,presStarted=false;
 function seenMs(u){const t=u&&u.lastSeen;return t&&t.toMillis?t.toMillis():t&&t.seconds?t.seconds*1000:0;}
 function isOnline(u){return Date.now()-seenMs(u)<ONLINE_MS;}
 function relSeen(u){const ms=seenMs(u);if(!ms)return 'niciodată';if(isOnline(u))return 'online';const m=Math.round((Date.now()-ms)/60000);if(m<60)return 'acum '+m+' min';const hh=Math.round(m/60);if(hh<24)return 'acum '+hh+' h';const d=new Date(ms);return d.toLocaleDateString('ro-RO',{day:'numeric',month:'short'})+', '+d.toLocaleTimeString('ro-RO',{hour:'2-digit',minute:'2-digit'});}
-function renderPresence(){const el=$('#pres');if(!el||!window.VSAdmin||!me.id)return;const us=Object.values(VSAdmin.users()).filter(u=>u.id!==me.id&&u.active!==false).sort((a,b)=>(isOnline(b)-isOnline(a))||(a.name||'').localeCompare(b.name||'','ro'));
+function renderPresence(){const el=$('#pres');if(!el||!window.VSAdmin||!me.id)return;const us=Object.values(VSAdmin.users()).filter(u=>u.id!==me.id&&u.active!==false&&(isAdmin||u.role==='admin')).sort((a,b)=>(isOnline(b)-isOnline(a))||(a.name||'').localeCompare(b.name||'','ro'));
 const on=new Set(us.filter(isOnline).map(u=>u.id));
 if(presOn&&isAdmin){us.filter(u=>on.has(u.id)&&!presOn.has(u.id)).forEach(u=>{toast((u.name||u.email)+' a intrat în aplicație');try{if(window.Notification&&Notification.permission==='granted'&&document.visibilityState!=='visible')new Notification('Vivid Senses Parteneri',{body:(u.name||u.email)+' a intrat în aplicație'});}catch(e){}});}
 presOn=on;el.replaceChildren(...(us.length?[h('div',{class:'ph'},'Echipa'),...us.map(u=>h('div',{class:'pu',title:u.email||''},h('i',{class:'dot'+(on.has(u.id)?' on':'')}),h('b',null,u.name||u.email),h('span',null,relSeen(u))))]:[]));}
@@ -570,6 +570,6 @@ renderNav();
 })();
 })();
 </script>
-<script type="module" src="firebase-bridge.js?v=20261106f"></script>
+<script type="module" src="firebase-bridge.js?v=20261106g"></script>
 </body>
 </html>
