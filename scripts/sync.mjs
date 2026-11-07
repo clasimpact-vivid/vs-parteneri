@@ -13,7 +13,7 @@ if (!sa.project_id) { console.error('Lipsește FIREBASE_SERVICE_ACCOUNT.'); proc
 initializeApp({ credential: cert(sa) });
 const fs = getFirestore();
 
-const DEF = { vat: 21, siteShip: 0, oblioCif: '', oblioSeries: '', oblioVat: 'Normala', oblioStock: 0, shopFrom: '2026-11-01' };
+const DEF = { vat: 21, siteShip: 26, oblioCif: '', oblioSeries: '', oblioVat: 'Normala', oblioStock: 0, shopFrom: '2026-11-01' };
 const sDoc = await fs.doc('settings/main').get();
 const st = { ...DEF, ...(sDoc.exists ? sDoc.data() : {}) };
 const n2 = v => { const x = parseFloat(v); return isFinite(x) ? x : 0; };
