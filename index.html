@@ -122,6 +122,7 @@ h2{font-family:var(--display);font-weight:500;font-size:19px;margin:0 0 4px;text
 .between{justify-content:space-between}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;min-width:0}
 .panel.alert{border-color:#d9a19c;box-shadow:inset 3px 0 0 #b4413a}
+.jd{overflow-wrap:anywhere;word-break:break-word;white-space:normal!important}
 .prog .bar{height:7px;border-radius:9px;background:var(--line);margin-top:6px;overflow:hidden}.prog .bar i{display:block;height:100%;border-radius:9px}
 details.panel summary::marker{color:var(--gold)}
 .grid{display:grid;gap:14px}
@@ -293,7 +294,7 @@ body.locked .app{display:none}
 <div id="ovroot"></div>
 
 <div id="print"></div>
-<script src="config.js?v=20261107e"></script>
+<script src="config.js?v=20261107f"></script>
 <script>window.__vsBridge={};(function(){var p={};['user','db'].forEach(function(k){p[k]=new Promise(function(r){window.__vsBridge[k]=r;});});window.claude={use:function(n){return p[n]||Promise.resolve(null);}};})();</script>
 <script>
 (() => {
@@ -580,8 +581,21 @@ if(!auditUnsub&&window.VSAdmin){auditUnsub=VSAdmin.auditFeed(r=>{auditRows=r;ren
 const head=h('div',null,h('div',{class:'eyebrow'},'Cine a schimbat ce și când'),h('h1',null,'Jurnal'),h('p',{class:'sub'},'Fiecare adăugare, modificare și ștergere rămâne aici. Partenerul nu vede și nu poate șterge jurnalul.'));
 if(auditRows==null)return [head,h('div',{class:'panel empty'},'Se încarcă jurnalul…')];
 const rows=auditRows.filter(a=>match(a.path,a.action,a.data,personName(a.by)));
-const col=p=>({sales:'Vânzare',salesEmag:'Vânzare eMAG',clients:'Client',samples:'Mostră',moves:'Stoc',products:'Produs',settings:'Setări',users:'Utilizator'})[(p||'').split('/')[0]]||p;
-return [head,rows.length?h('div',{class:'tw'},h('table',null,h('thead',null,h('tr',null,['Când','Cine','Ce','Unde','Detalii'].map(x=>h('th',null,x)))),h('tbody',null,rows.map(a=>{const d=a.ts&&a.ts.toDate?a.ts.toDate():null;return h('tr',null,h('td',null,d?d.toLocaleString('ro-RO',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'acum'),h('td',null,personName(a.by)),h('td',null,h('span',{class:'pill '+(a.action==='șters'?'bad':a.action==='adăugat'?'good':'')},a.action)),h('td',null,col(a.path)),h('td',{class:'wrapc',style:'max-width:520px;font-size:12px;color:var(--muted)'},(a.data||'').slice(0,240)));})))):h('div',{class:'panel empty'},'Nicio modificare încă.')];}
+const col=p=>({sales:'Vânzare',salesEmag:'Vânzare eMAG',clients:'Client',samples:'Mostră',moves:'Stoc',products:'Produs',settings:'Setări',users:'Utilizator',payouts:'Plată partener',visits:'Vizită',posts:'Postare'})[(p||'').split('/')[0]]||p;
+const cname=id=>(S.clients[id]||{}).name||'';
+const human=a=>{let d=null;try{d=JSON.parse(a.data||'');}catch(e){}if(!d||typeof d!=='object')return a.data?String(a.data).slice(0,160):'';const c=(a.path||'').split('/')[0];const P=x=>x==null?'':x;
+ if(c==='products')return [P(d.line),P(d.name),d.kind&&d.kind!=='Difuzor'?d.kind.toLowerCase():'',d.size?d.size+' ml':''].filter(Boolean).join(' · ')+(d.price!=null?' — vânzare '+lei(d.price,2):'')+(d.cost!=null?', achiziție '+lei(d.cost,2):'')+(d.active===false?' · inactiv':'');
+ if(c==='sales'||c==='salesEmag'){const t=(d.lines||[]).reduce((x,l)=>x+n2(l.qty)*n2(l.unitPrice),0);return [cname(d.clientId),(d.lines||[]).map(l=>l.qty+'× '+pname(l.productId)).join(', '),lei(t,2),d.storno?'storno':'',d.paid===false?'de încasat':d.paid?'încasat':'',d.approval==='pending'?'așteaptă aprobare':d.approval==='approved'?'aprobată':d.approval==='rejected'?'respinsă':'',d.invoice&&d.invoice.number?'factura '+(d.invoice.series||'')+' '+d.invoice.number:''].filter(Boolean).join(' · ');}
+ if(c==='clients')return [P(d.name),d.city,d.stage?((STAGES.find(x=>x[0]===d.stage)||[])[1]||d.stage):'',d.cui?'CUI '+d.cui:''].filter(Boolean).join(' · ');
+ if(c==='moves')return (n2(d.qty)>0?'+':'')+d.qty+' × '+pname(d.productId)+' · '+P(d.reason)+(d.loc?' · '+(d.loc==='masina'?'mașină':'depozit'):'')+(d.note?' · '+d.note:'');
+ if(c==='samples')return P(d.qty||1)+' × '+pname(d.productId)+(d.clientId?' → '+cname(d.clientId):'')+(d.outcome?' · '+d.outcome:'');
+ if(c==='payouts')return 'brut '+lei(d.gross,2)+' · net '+lei(d.net,2)+(d.from?' · încasări '+fmtD(d.from)+' – '+fmtD(d.to):'');
+ if(c==='visits')return cname(d.clientId)+(d.note?' · '+d.note:'');
+ if(c==='posts')return P(d.platform)+(d.link?' · '+d.link:'');
+ if(c==='settings')return 'setările de calcul';
+ if(c==='users')return [P(d.name),d.role==='admin'?'administrator':d.role?'partener':'',d.active===false?'dezactivat':''].filter(Boolean).join(' · ')||'cont';
+ return Object.keys(d).slice(0,6).join(', ');};
+return [head,rows.length?h('div',{class:'tw'},h('table',null,h('thead',null,h('tr',null,['Când','Cine','Ce','Unde','Detalii'].map(x=>h('th',null,x)))),h('tbody',null,rows.map(a=>{const d=a.ts&&a.ts.toDate?a.ts.toDate():null;return h('tr',null,h('td',null,d?d.toLocaleString('ro-RO',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'acum'),h('td',null,personName(a.by)),h('td',null,h('span',{class:'pill '+(a.action==='șters'?'bad':a.action==='adăugat'?'good':'')},a.action)),h('td',null,col(a.path)),h('td',{class:'wrapc jd',style:'max-width:520px;font-size:12.5px;color:var(--muted)'},human(a)));})))):h('div',{class:'panel empty'},'Nicio modificare încă.')];}
 
 // ---------- CONT ȘI UTILIZATORI ----------
 let usersSnap=null,usersUnsub=null;
@@ -665,7 +679,7 @@ renderNav();
 })();
 })();
 </script>
-<script type="module" src="firebase-bridge.js?v=20261107e"></script>
+<script type="module" src="firebase-bridge.js?v=20261107f"></script>
 <script>if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
 </body>
 </html>
