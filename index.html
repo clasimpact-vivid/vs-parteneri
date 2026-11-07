@@ -148,6 +148,9 @@ details.panel summary::marker{color:var(--gold)}
 .kpi .n{font-size:12px;color:var(--muted)}
 .kpi.hl .v{color:var(--gold)}
 .tw{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+/* coloane despărțite prin bare verticale, ca în PDF */
+.tw th+th,.tw td+td{border-left:1px solid var(--line)}
+@media (max-width:640px){main .tw th+th,main .tw td+td{border-left:0}}
 table{border-collapse:collapse;width:100%;font-size:13.5px}
 th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:middle}
 th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500;background:var(--surface2);position:sticky;top:0}
@@ -327,7 +330,7 @@ body.locked .app{display:none}
 <div id="ovroot"></div>
 
 <div id="print"></div>
-<script src="config.js?v=20261107r"></script>
+<script src="config.js?v=20261107s"></script>
 <script>window.__vsBridge={};(function(){var p={};['user','db'].forEach(function(k){p[k]=new Promise(function(r){window.__vsBridge[k]=r;});});window.claude={use:function(n){return p[n]||Promise.resolve(null);}};})();</script>
 <script>
 (() => {
@@ -747,7 +750,7 @@ renderNav();
 })();
 })();
 </script>
-<script type="module" src="firebase-bridge.js?v=20261107r"></script>
+<script type="module" src="firebase-bridge.js?v=20261107s"></script>
 <script>if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
 </body>
 </html>
