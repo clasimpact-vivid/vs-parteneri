@@ -308,7 +308,7 @@ body.locked .app{display:none}
 <div id="ovroot"></div>
 
 <div id="print"></div>
-<script src="config.js?v=20261107i"></script>
+<script src="config.js?v=20261107j"></script>
 <script>window.__vsBridge={};(function(){var p={};['user','db'].forEach(function(k){p[k]=new Promise(function(r){window.__vsBridge[k]=r;});});window.claude={use:function(n){return p[n]||Promise.resolve(null);}};})();</script>
 <script>
 (() => {
@@ -477,7 +477,7 @@ modal([h('h2',null,'Intrare marfă sau corecție'),h('p',{class:'note'},'Cantita
 // ---------- VÂNZĂRI ----------
 function unpaidPanel(always){const u=unpaid();if(!u.length)return always?h('div',{class:'panel'},h('h2',null,'De încasat'),h('p',{class:'empty'},'Toți clienții au plătit.')):null;const tot=u.reduce((t,s)=>t+saleCalc(s).gross,0),lateN=u.filter(s=>payState(s).k==='late').length;
 return h('div',{class:'panel'+(lateN?' alert':'')},h('div',{class:'row between'},h('h2',null,'De încasat · '+lei(tot)),lateN?h('span',{class:'pill bad'},lateN+' întârziate'):null),h('div',{class:'todo',style:'margin-top:10px'},u.slice(0,15).map(s=>h('div',{class:'it'},h('div',null,h('div',null,h('b',null,(S.clients[s.clientId]||{}).name||'Client fără nume'),' · ',lei(saleCalc(s).gross)),h('div',{class:'note'},'vânzare din '+fmtD(s.date)+' · scadent '+fmtD(s.payDue||s.date)+' · '+personName(s.by))),h('div',{class:'row',style:'flex-wrap:nowrap;gap:6px'},payPill(s),canEditSale(s)?h('button',{class:'b sm',onclick:()=>markPaid(s)},'Încasat ✓'):null)))));}
-function invBox(s,isNew){if(isNew||!s.id)return null;const inv=s.invoice;const c=S.clients[s.clientId]||{};const man=h('input',{placeholder:'ex. VS 0123',value:''});
+function invBox(s,isNew){if(isNew||!s.id)return null;if(s.channel==='site'&&!(s.invoice&&s.invoice.number))return h('div',{class:'panel',style:'padding:12px'},h('span',{class:'note'},'Comanda de pe site: factura o emite automat integrarea Oblio–Shopify.'));const inv=s.invoice;const c=S.clients[s.clientId]||{};const man=h('input',{placeholder:'ex. VS 0123',value:''});
 const st=inv&&inv.number?h('span',null,'Factură: ',inv.link?h('a',{href:inv.link,target:'_blank',rel:'noopener'},(inv.series||'')+' '+inv.number):(inv.series||'')+' '+inv.number):s.invoiceReq==='pending'?h('span',{class:'pill warn'},'factura se emite în Oblio (în max. 30 min)'):s.invoiceErr?h('span',{class:'pill bad',title:s.invoiceErr},'eroare Oblio: '+String(s.invoiceErr).slice(0,80)):h('span',{class:'note'},'Fără factură încă.');
 return h('div',{class:'panel',style:'padding:12px'},h('div',{class:'row between'},st,isAdmin&&!(inv&&inv.number)?h('div',{class:'row',style:'gap:6px'},h('button',{class:'b sm',disabled:s.invoiceReq==='pending',onclick:async()=>{if(!c.cui&&!c.firm&&!confirm('Clientul nu are CUI sau denumire legală. Emit factura pe persoană fizică, cu numele '+(c.name||'Client')+'?'))return;await guard(()=>db.doc((s._col||'sales')+'/'+s.id).update({invoiceReq:'pending',invoiceErr:null}),'Trimis spre Oblio');close();}},'Emite factură în Oblio'),man,h('button',{class:'b sm',onclick:async()=>{if(!man.value.trim())return;const m=man.value.trim().match(/^([A-Za-z]+)\s*0*(\d+)$/);await guard(()=>db.doc((s._col||'sales')+'/'+s.id).update({invoice:m?{series:m[1],number:m[2]}:{series:'',number:man.value.trim()}}),'Factură salvată');close();}},'Salvează nr. manual')):null));}
 function stornoModal(s){const qs=(s.lines||[]).map(l=>h('input',{type:'number',min:'0',max:String(l.qty),value:String(l.qty),style:'max-width:90px'}));const dt=h('input',{type:'date',value:today()});const no=h('input',{placeholder:'motivul returului'});
@@ -693,7 +693,7 @@ renderNav();
 })();
 })();
 </script>
-<script type="module" src="firebase-bridge.js?v=20261107i"></script>
+<script type="module" src="firebase-bridge.js?v=20261107j"></script>
 <script>if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
 </body>
 </html>
