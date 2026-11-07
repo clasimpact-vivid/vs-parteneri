@@ -123,12 +123,21 @@ h2{font-family:var(--display);font-weight:500;font-size:19px;margin:0 0 4px;text
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;min-width:0}
 .panel.alert{border-color:#d9a19c;box-shadow:inset 3px 0 0 #b4413a}
 .jd{overflow-wrap:anywhere;word-break:break-word;white-space:normal!important}
+.kpi[data-tip]{position:relative;cursor:help;outline:none}
+.kpi[data-tip] .l::after{content:'i';display:inline-grid;place-items:center;width:14px;height:14px;margin-left:6px;border-radius:50%;border:1px solid currentColor;font-size:9.5px;font-style:italic;font-family:Georgia,serif;letter-spacing:0;text-transform:none;opacity:.55;vertical-align:1px}
+.kpi[data-tip]:hover::after,.kpi[data-tip]:focus::after{content:attr(data-tip);position:absolute;top:calc(100% + 8px);left:0;width:min(290px,86vw);background:#1c1b18;color:#f2ede3;font-size:12.5px;line-height:1.5;letter-spacing:0;text-transform:none;font-weight:400;padding:10px 12px;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.18);z-index:40;white-space:normal}
+.kpi.tr[data-tip]:hover::after,.kpi.tr[data-tip]:focus::after{left:auto;right:0}
 .prog .bar{height:7px;border-radius:9px;background:var(--line);margin-top:6px;overflow:hidden}.prog .bar i{display:block;height:100%;border-radius:9px}
 details.panel summary::marker{color:var(--gold)}
 .grid{display:grid;gap:14px}
 .g2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
 .kpi{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:13px 15px;display:flex;flex-direction:column;gap:2px}
+/* eticheta, cifra și nota stau pe aceleași rânduri în toate casetele de pe un rând: cifrele sunt aliniate, jos sub etichetă */
+.kpis>.kpi{display:grid;grid-row:span 3;grid-template-rows:subgrid;row-gap:2px;align-content:start}
+.kpis>.kpi>.l{align-self:start}
+.kpis>.kpi>.v{align-self:end;padding-top:6px}
+.kpis>.kpi>.n{align-self:start}
 .kpi .l{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .kpi .v{font-size:22px;font-weight:500}
 .kpi .n{font-size:12px;color:var(--muted)}
@@ -308,7 +317,7 @@ body.locked .app{display:none}
 <div id="ovroot"></div>
 
 <div id="print"></div>
-<script src="config.js?v=20261107l"></script>
+<script src="config.js?v=20261107m"></script>
 <script>window.__vsBridge={};(function(){var p={};['user','db'].forEach(function(k){p[k]=new Promise(function(r){window.__vsBridge[k]=r;});});window.claude={use:function(n){return p[n]||Promise.resolve(null);}};})();</script>
 <script>
 (() => {
@@ -381,9 +390,27 @@ const on=new Set(us.filter(isOnline).map(u=>u.id));
 if(presOn&&isAdmin){us.filter(u=>on.has(u.id)&&!presOn.has(u.id)).forEach(u=>{toast((u.name||u.email)+' a intrat în aplicație');try{if(window.Notification&&Notification.permission==='granted'&&document.visibilityState!=='visible')new Notification('Vivid Senses Parteneri',{body:(u.name||u.email)+' a intrat în aplicație'});}catch(e){}});}
 presOn=on;el.replaceChildren(...(us.length?[h('div',{class:'ph'},'Echipa'),...us.map(u=>h('div',{class:'pu',title:u.email||''},h('i',{class:'dot'+(on.has(u.id)?' on':'')}),h('b',null,u.name||u.email),h('span',null,relSeen(u))))]:[]));}
 function startPresence(){if(presStarted||!window.VSAdmin||!me.id)return;presStarted=true;VSAdmin.onUsers(()=>renderPresence());setInterval(renderPresence,30000);renderPresence();}
+// Explicații la cifrele din carduri (apar la trecerea cu mouse-ul sau la atingere pe telefon)
+function kpiTips(root){const st=set();const sh=st.shareSite;const T=[
+ [/^vânzări cu tva/i,()=>'Tot ce au plătit clienții în perioada aleasă, cu TVA inclus: comenzile de pe site și cele aduse de agent'+(isAdmin?' (plus eMAG, pe care partenerul nu îl vede)':'')+'.'],
+ [/^tva de plată/i,()=>'TVA-ul de '+st.vat+'% inclus în prețuri. Nu sunt banii firmei: se virează la stat.'],
+ [/^cost marfă/i,()=>'Prețul de achiziție, fără TVA, al produselor vândute.'],
+ [/^comisioane/i,()=>'Comisionul de plată cu cardul ('+st.payFee+'% la comenzile de pe site)'+(isAdmin?', comisionul eMAG':'')+' și costul curierului plătit de firmă (cât nu a plătit clientul).'],
+ [/^profit brut/i,()=>'Vânzări fără TVA − cost marfă − comisioane și transport, înainte de impozitul pe micro.'],
+ [/^profit net/i,()=>'Vânzări fără TVA − cost marfă − comisioane și transport − impozitul pe micro de '+st.micro+'%. Din acest profit se împarte cota.'],
+ [/^cot(ă|a) partener/i,()=>sh+'% din profitul net al comenzilor de pe site și al celor aduse de agent, socotit doar pentru banii deja încasați de la clienți. Ce e încă neîncasat se adaugă după încasare.'],
+ [/^cot(ă|a) vivid senses/i,()=>'Ce rămâne firmei din profitul net după cota partenerului'+(isAdmin?', inclusiv tot profitul de pe eMAG':'')+'. Din ea se plătesc mașina, mostrele și restul cheltuielilor.'],
+ [/^mostre date/i,()=>'Câte mostre s-au dat și cât au costat la preț de achiziție. Le suportă Vivid Senses; nu se scad din cota partenerului.'],
+ [/^valoare stoc/i,()=>'Marfa din depozit și din mașină, la preț de achiziție.'],
+ [/^sold de plătit/i,()=>'Cât mai are de primit partenerul până la data aleasă: cotele din toate încasările minus plățile deja făcute. Dacă o lună a ieșit pe minus, pierderea se scade întâi. Brut, impozitul reținut și netul de virat.'],
+ [/^cota din încasările/i,()=>'Cota calculată doar din banii încasați între cele două date alese.'],
+ [/^încasat în interval/i,()=>'Banii intrați efectiv de la clienți între cele două date, cu TVA, și profitul net din ei.'],
+ [/^restant/i,()=>'Vânzări făcute până la data aleasă, dar încă neîncasate. Cota pe ele se plătește în luna în care clientul plătește.']];
+ root.querySelectorAll('.kpi').forEach(k=>{const l=k.querySelector('.l');if(!l)return;const t=l.textContent.trim();const hit=T.find(([re])=>re.test(t));if(!hit)return;k.setAttribute('data-tip',hit[1]());k.tabIndex=0;});
+ requestAnimationFrame(()=>root.querySelectorAll('.kpi[data-tip]').forEach(k=>{const r=k.getBoundingClientRect();k.classList.toggle('tr',r.left+r.width/2>innerWidth/2);}));}
 function renderNav(){startPresence();const due=fuDue().length;const late=unpaid().filter(x=>payState(x).k==='late').length+(isAdmin?pendingSales().length:0);const badge={clienti:Object.keys(S.clients).length||null,mostre:due?[due,'hot']:null,vanzari:late?[late,'hot']:null};$('#nav').replaceChildren(...TABS.filter(([k])=>k!=='jurnal'||isAdmin).map(([k,l])=>k==='g'?h('div',{class:'sgrp'},l):h('button',{class:'nv','aria-current':tab===k?'page':null,onclick:()=>go(k)},h('span',{html:'<svg viewBox="0 0 24 24"><path d="'+IC[k]+'"/></svg>'}),l,badge[k]?h('span',{class:'bdg'+(Array.isArray(badge[k])?' hot':'')},Array.isArray(badge[k])?badge[k][0]:badge[k]):null)));$('#tt').textContent=TITLES[tab]||'Panou';const nb=$('#newb');const act={panou:['+ Vânzare',()=>saleModal()],clienti:['+ Client nou',()=>clientModal()],mostre:['+ Mostră',()=>sampleModal()],vanzari:['+ Vânzare',()=>saleModal()],produse:isAdmin?['+ Produs',()=>prodModal()]:null,stoc:['+ Intrare marfă',()=>moveModal()]}[tab];nb.hidden=!act;if(act){nb.textContent=act[0];nb.onclick=act[1];}const ex={vanzari:[['Excel',exportVanzari],['Decont PDF',printDecont]],clienti:[['Excel',exportClienti]],stoc:[['Excel',exportStoc]]}[tab]||[];$('#exps').replaceChildren(...ex.map(([l,f])=>h('button',{class:'b',onclick:f},l)));}
 function monthPicker(){return h('label',{class:'f',style:'max-width:180px'},'Luna',h('input',{type:'month',id:'month',value:month,onchange:e=>{month=e.target.value;render();}}));}
-let rq=false;function render(){if(rq)return;rq=true;requestAnimationFrame(()=>{rq=false;renderNav();const m=$('#main');const f={panou:vPanou,produse:vProduse,stoc:vStoc,vanzari:vVanzari,clienti:vClienti,mostre:vMostre,rapoarte:vRapoarte,jurnal:vJurnal,setari:vSetari}[tab]||vPanou;m.replaceChildren(...[].concat(f()).filter(x=>x!=null&&x!==false));m.querySelectorAll('.tw table').forEach(t=>{const hs=[...t.querySelectorAll('thead th')].map(th=>th.textContent.trim());t.querySelectorAll('tbody tr').forEach(tr=>[...tr.children].forEach((td,i)=>td.setAttribute('data-label',hs[i]||'')));});});}
+let rq=false;function render(){if(rq)return;rq=true;requestAnimationFrame(()=>{rq=false;renderNav();const m=$('#main');const f={panou:vPanou,produse:vProduse,stoc:vStoc,vanzari:vVanzari,clienti:vClienti,mostre:vMostre,rapoarte:vRapoarte,jurnal:vJurnal,setari:vSetari}[tab]||vPanou;m.replaceChildren(...[].concat(f()).filter(x=>x!=null&&x!==false));kpiTips(m);m.querySelectorAll('.tw table').forEach(t=>{const hs=[...t.querySelectorAll('thead th')].map(th=>th.textContent.trim());t.querySelectorAll('tbody tr').forEach(tr=>[...tr.children].forEach((td,i)=>td.setAttribute('data-label',hs[i]||'')));});});}
 $('#ham').onclick=()=>{$('#side').classList.add('open');$('#sback').classList.add('open');};$('#sback').onclick=()=>{$('#side').classList.remove('open');$('#sback').classList.remove('open');};
 let qt;$('#q').addEventListener('input',e=>{clearTimeout(qt);qt=setTimeout(()=>{q=e.target.value.trim();render();},150);});
 
@@ -693,7 +720,7 @@ renderNav();
 })();
 })();
 </script>
-<script type="module" src="firebase-bridge.js?v=20261107l"></script>
+<script type="module" src="firebase-bridge.js?v=20261107m"></script>
 <script>if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
 </body>
 </html>
