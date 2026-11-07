@@ -42,7 +42,7 @@ async function shopify() {
     token = j.access_token;
   }
   const gql = async (query, variables) => {
-    const r = await fetch(`https://${shop}.myshopify.com/admin/api/2025-10/graphql.json`, {
+    const r = await fetch(`https://${shop}.myshopify.com/admin/api/2026-10/graphql.json`, {
       method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Shopify-Access-Token': token }, body: JSON.stringify({ query, variables })
     });
     const j = await r.json();
