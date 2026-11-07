@@ -50,7 +50,7 @@ async function shopify() {
     return j.data;
   };
   const Q = `query($q:String,$after:String){orders(first:40,after:$after,query:$q,sortKey:UPDATED_AT){pageInfo{hasNextPage endCursor}nodes{
-    legacyResourceId name processedAt cancelledAt test displayFinancialStatus
+    legacyResourceId name processedAt cancelledAt test displayFinancialStatus totalShippingPriceSet{shopMoney{amount}}
     customer{displayName} billingAddress{company name city}
     lineItems(first:50){nodes{quantity title variantTitle sku
       discountedUnitPriceAfterAllDiscountsSet{shopMoney{amount}} originalUnitPriceSet{shopMoney{amount}}
@@ -92,7 +92,10 @@ async function shopify() {
           unitCost: p ? (oldCost[p.id] ?? n2(p.cost)) : 0 });
       }
       const who = (o.billingAddress && (o.billingAddress.company || o.billingAddress.name)) || (o.customer && o.customer.displayName) || '';
-      const doc = { date, channel: 'site', clientId: old.clientId || null, ship: old.ship ?? n2(st.siteShip),
+      // Transport: dacă clientul l-a plătit (comenzi sub pragul de livrare gratuită), firma suportă doar diferența până la costul curierului.
+      const charged = n2(o.totalShippingPriceSet && o.totalShippingPriceSet.shopMoney.amount);
+      const shipCost = Math.max(0, Math.round((n2(st.siteShip) - charged) * 100) / 100);
+      const doc = { date, channel: 'site', clientId: old.clientId || null, ship: old.shipManual ? old.ship : shipCost,
         note: `Shopify ${o.name}${who ? ' · ' + who : ''}`, lines: lines.map(l => Object.fromEntries(Object.entries(l).filter(([, v]) => v !== undefined))),
         by: 'shopify', loc: 'depozit', shopId: o.legacyResourceId, paid,
         paidDate: paid ? (tx ? roDay(tx.processedAt) : date) : null, payDue: paid ? null : addDays(date, 7) };
