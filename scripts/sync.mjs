@@ -89,7 +89,7 @@ async function shopify() {
         if (!p) warn.push(`${o.name}: ${li.title}${li.variantTitle ? ' / ' + li.variantTitle : ''}`);
         lines.push({ productId: p ? p.id : null, name: p ? undefined : li.title, qty: li.quantity,
           unitPrice: n2((li.discountedUnitPriceAfterAllDiscountsSet || li.originalUnitPriceSet).shopMoney.amount),
-          unitCost: p ? (oldCost[p.id] ?? n2(p.cost)) : 0 });
+          unitCost: p ? (n2(oldCost[p.id]) || n2(p.cost)) : 0 });
       }
       const who = (o.billingAddress && (o.billingAddress.company || o.billingAddress.name)) || (o.customer && o.customer.displayName) || '';
       // Transport: dacă clientul l-a plătit (comenzi sub pragul de livrare gratuită), firma suportă doar diferența până la costul curierului.
@@ -104,7 +104,7 @@ async function shopify() {
       for (const rf of o.refunds || []) {
         const items = rf.refundLineItems.nodes;
         if (!items.length) continue;
-        const rl = items.map(it => { const p = match(it.lineItem); return { productId: p ? p.id : null, qty: -it.quantity, unitPrice: n2(it.priceSet.shopMoney.amount), unitCost: p ? (oldCost[p.id] ?? n2(p.cost)) : 0 }; });
+        const rl = items.map(it => { const p = match(it.lineItem); return { productId: p ? p.id : null, qty: -it.quantity, unitPrice: n2(it.priceSet.shopMoney.amount), unitCost: p ? (n2(oldCost[p.id]) || n2(p.cost)) : 0 }; });
         const rd = roDay(rf.createdAt);
         await fs.doc('sales/' + id + '_r' + rf.legacyResourceId).set({ date: rd, channel: 'site', clientId: null, ship: 0, note: `Storno Shopify ${o.name}`,
           lines: rl, by: 'shopify', loc: 'depozit', storno: true, refOf: id, paid: true, paidDate: rd }, { merge: true });

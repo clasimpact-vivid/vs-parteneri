@@ -33,7 +33,7 @@ const pname = id => { const p = P[id]; return p ? [p.name, p.size ? p.size + ' m
 
 function saleCalc(s) {
   let gross = 0, cogs = 0;
-  for (const l of s.lines || []) { gross += n2(l.qty) * n2(l.unitPrice); cogs += n2(l.qty) * n2(l.unitCost); }
+  for (const l of s.lines || []) { gross += n2(l.qty) * n2(l.unitPrice); cogs += n2(l.qty) * (n2(l.unitCost) || n2((P[l.productId] || {}).cost)); }
   const net = gross / (1 + st.vat / 100);
   const fees = s.channel === 'emag' ? gross * st.emagFee / 100 : s.channel === 'site' ? gross * st.payFee / 100 : 0;
   const np = net - cogs - fees - n2(s.ship) - net * st.micro / 100;
