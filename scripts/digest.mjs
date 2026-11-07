@@ -37,7 +37,8 @@ function saleCalc(s) {
   const net = gross / (1 + st.vat / 100);
   const fees = s.channel === 'emag' ? gross * st.emagFee / 100 : s.channel === 'site' ? gross * st.payFee / 100 : 0;
   const np = net - cogs - fees - n2(s.ship) - net * st.micro / 100;
-  const sh = s.channel === 'site' ? st.shareSite : s.channel === 'agent' ? st.shareAgent : st.shareEmag;
+  const on = !!st.partnerFrom && (s.date || '') >= st.partnerFrom;
+  const sh = !on ? 0 : s.channel === 'site' ? st.shareSite : s.channel === 'agent' ? st.shareAgent : st.shareEmag;
   return { gross, np, partner: np * sh / 100 };
 }
 function stockOf(pid) {

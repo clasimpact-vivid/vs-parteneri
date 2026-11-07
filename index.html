@@ -317,11 +317,11 @@ body.locked .app{display:none}
 <div id="ovroot"></div>
 
 <div id="print"></div>
-<script src="config.js?v=20261107m"></script>
+<script src="config.js?v=20261107n"></script>
 <script>window.__vsBridge={};(function(){var p={};['user','db'].forEach(function(k){p[k]=new Promise(function(r){window.__vsBridge[k]=r;});});window.claude={use:function(n){return p[n]||Promise.resolve(null);}};})();</script>
 <script>
 (() => {
-const DEF = {vat:21, micro:1, divTax:16, shareSite:50, shareAgent:50, shareEmag:0, payFee:1.9, emagFee:21, sampleTarget:30, payTerm:14, payoutTax:10, maxDisc:10, daysPer100:30, refillLead:14, visitsWeek:10, samplesMonth:12, ordersMonth:4, postsMonth:12, siteShip:26, oblioCif:'RO37488718', oblioSeries:'', oblioVat:'Normala', oblioStock:0, shopFrom:'2026-11-01'};
+const DEF = {vat:21, micro:1, divTax:16, shareSite:50, shareAgent:50, shareEmag:0, payFee:1.9, emagFee:21, sampleTarget:30, payTerm:14, payoutTax:10, maxDisc:10, daysPer100:30, refillLead:14, visitsWeek:10, samplesMonth:12, ordersMonth:4, postsMonth:12, siteShip:26, partnerFrom:'',oblioCif:'RO37488718', oblioSeries:'', oblioVat:'Normala', oblioStock:0, shopFrom:'2026-11-01'};
 const CH = {site:'Site vividsenses.ro', agent:'Agent (teren)', emag:'eMAG'};
 const KINDS = ['Difuzor','Rezervă','Spray','Set cadou','Săculeț auto','Parfum rufe','Săpun lichid','Lumânare','Altele'];
 const SIZES = [125,250,500,1000,2500,5000];
@@ -357,7 +357,7 @@ function stockAt(pid,loc){let q=0;for(const m of S.moves)if(m.productId===pid&&(
 function stockOf(pid){let q=0;for(const m of S.moves)if(m.productId===pid)q+=n2(m.qty);for(const s of S.sales)for(const l of s.lines||[])if(l.productId===pid)q-=n2(l.qty);for(const s of S.samples)if(s.productId===pid)q-=n2(s.qty||1);return q;}
 function unitCalc(p){const st=set();const price=n2(p.price),cost=n2(p.cost);const net=price/(1+st.vat/100);const gp=net-cost;const micro=net*st.micro/100;const np=gp-micro;return{price,net,cost,gp,micro,np,margin:net>0?gp/net*100:NaN,markup:cost>0?(net/cost-1)*100:NaN,partner:Math.max(0,np*st.shareAgent/100)};}
 function shareFor(ch){const st=set();return ch==='site'?st.shareSite:ch==='agent'?st.shareAgent:st.shareEmag;}
-function saleCalc(s){const st=set();let gross=0,cogs=0;for(const l of s.lines||[]){gross+=n2(l.qty)*n2(l.unitPrice);cogs+=n2(l.qty)*(n2(l.unitCost)||n2((S.products[l.productId]||{}).cost));}const net=gross/(1+st.vat/100);const fees=s.channel==='emag'?gross*st.emagFee/100:s.channel==='site'?gross*st.payFee/100:0;const ship=n2(s.ship);const gp=net-cogs-fees-ship;const micro=net*st.micro/100;const np=gp-micro;const sh=shareFor(s.channel);const partner=np*sh/100;return{gross,net,vat:gross-net,cogs,fees,ship,gp,micro,np,sh,partner,alex:np-partner};}
+function saleCalc(s){const st=set();let gross=0,cogs=0;for(const l of s.lines||[]){gross+=n2(l.qty)*n2(l.unitPrice);cogs+=n2(l.qty)*(n2(l.unitCost)||n2((S.products[l.productId]||{}).cost));}const net=gross/(1+st.vat/100);const fees=s.channel==='emag'?gross*st.emagFee/100:s.channel==='site'?gross*st.payFee/100:0;const ship=n2(s.ship);const gp=net-cogs-fees-ship;const micro=net*st.micro/100;const np=gp-micro;const pf=st.partnerFrom||'';const on=!!pf&&(s.date||'')>=pf;const sh=on?shareFor(s.channel):0;const partner=np*sh/100;return{gross,net,vat:gross-net,cogs,fees,ship,gp,micro,np,sh,partner,alex:np-partner};}
 function inMonth(d){return !month||(d||'').slice(0,7)===month;}
 function monthAgg(){const r={gross:0,net:0,cogs:0,fees:0,ship:0,gp:0,micro:0,np:0,partner:0,alex:0,orders:0,byCh:{}};for(const s of S.sales){if(!inMonth(s.date))continue;const c=saleCalc(s);r.orders++;for(const k of['gross','net','cogs','fees','ship','gp','micro','np','partner','alex'])r[k]+=c[k];const b=r.byCh[s.channel]||(r.byCh[s.channel]={gross:0,np:0,partner:0,orders:0});b.gross+=c.gross;b.np+=c.np;b.partner+=c.partner;b.orders++;}let sc=0,sn=0;for(const s of S.samples){if(!inMonth(s.date))continue;sn+=n2(s.qty||1);sc+=n2(s.qty||1)*n2(s.unitCost);}r.samples=sn;r.sampleCost=sc;if(r.partner<0){r.alex+=r.partner;r.partner=0;r.carry=true;}let pp=0,pd=0;for(const s of S.sales){if(s.channel==='emag')continue;const po=paidOn(s);if(po&&inMonth(po))pp+=saleCalc(s).partner;else if(!po&&inMonth(s.date))pd+=saleCalc(s).partner;}r.partnerPaid=Math.max(0,pp);r.partnerPend=pd;return r;}
 function approved(s){return s.approval!=='pending'&&s.approval!=='rejected';}
@@ -398,7 +398,7 @@ function kpiTips(root){const st=set();const sh=st.shareSite;const T=[
  [/^comisioane/i,()=>'Comisionul de plată cu cardul ('+st.payFee+'% la comenzile de pe site)'+(isAdmin?', comisionul eMAG':'')+' și costul curierului plătit de firmă (cât nu a plătit clientul).'],
  [/^profit brut/i,()=>'Vânzări fără TVA − cost marfă − comisioane și transport, înainte de impozitul pe micro.'],
  [/^profit net/i,()=>'Vânzări fără TVA − cost marfă − comisioane și transport − impozitul pe micro de '+st.micro+'%. Din acest profit se împarte cota.'],
- [/^cot(ă|a) partener/i,()=>sh+'% din profitul net al comenzilor de pe site și al celor aduse de agent, socotit doar pentru banii deja încasați de la clienți. Ce e încă neîncasat se adaugă după încasare.'],
+ [/^cot(ă|a) partener/i,()=>(st.partnerFrom?'De la '+fmtD(st.partnerFrom)+': ':'Parteneriatul nu a pornit încă (data de start din Setări e goală), deci cota e 0. După pornire: ')+sh+'% din profitul net al comenzilor de pe site și al celor aduse de agent, socotit doar pentru banii deja încasați de la clienți. Ce e încă neîncasat se adaugă după încasare.'],
  [/^cot(ă|a) vivid senses/i,()=>'Ce rămâne firmei din profitul net după cota partenerului'+(isAdmin?', inclusiv tot profitul de pe eMAG':'')+'. Din ea se plătesc mașina, mostrele și restul cheltuielilor.'],
  [/^mostre date/i,()=>'Câte mostre s-au dat și cât au costat la preț de achiziție. Le suportă Vivid Senses; nu se scad din cota partenerului.'],
  [/^valoare stoc/i,()=>'Marfa din depozit și din mașină, la preț de achiziție.'],
@@ -610,6 +610,7 @@ function vSetariBase(){const st=set();const f={},ft={};const inp=(k,lab,hint)=>{
 return [h('div',null,h('div',{class:'eyebrow'},'Regulile calculului'),h('h1',null,'Setări'),h('p',{class:'sub'},isAdmin?'Le schimbi doar tu; partenerul le vede, ca să știe exact cum se calculează cota lui.':'Setările le modifică Alex. Le vezi aici ca să știi exact cum se calculează cota ta.')),
 h('div',{class:'panel'},h('h2',null,'Împărțirea profitului net'),h('div',{class:'fgrid',style:'margin-top:10px'},inp('shareSite','Comenzi de pe site, % partener'),inp('shareAgent','Comenzi aduse de agent, % partener'),isAdmin?inp('shareEmag','Comenzi eMAG, % partener'):null)),
 h('div',{class:'panel'},h('h2',null,'Taxe și costuri'),h('div',{class:'fgrid',style:'margin-top:10px'},inp('vat','TVA %'),inp('micro','Impozit micro %','din venitul fără TVA'),inp('divTax','Impozit dividende %','informativ'),inp('payFee','Comision plată card %','comenzi de pe site'),isAdmin?inp('emagFee','Comision eMAG %','la prețul cu TVA'):null,inp('sampleTarget','Ținta de mostre','buc.'),inp('payTerm','Termen de plată implicit','zile, la comenzile aduse de agent'),inp('payoutTax','Impozit reținut la plata cotei %','confirmă cota cu contabila'),inp('maxDisc','Discount maxim fără aprobare %','sub prețul de listă'),inp('siteShip','Cost mediu curier comandă site','lei; din el se scade transportul plătit de client'))),
+h('div',{class:'panel'},h('h2',null,'Pornirea parteneriatului'),h('div',{class:'fgrid',style:'margin-top:10px'},txt('partnerFrom','Parteneriatul începe la','AAAA-LL-ZZ. Gol = nu a început: cota partenerului e 0. Contează data vânzării.'))),
 h('div',{class:'panel'},h('h2',null,'Teren: reumpleri și ținte'),h('div',{class:'fgrid',style:'margin-top:10px'},inp('daysPer100','Zile de parfum la 100 ml','ex. 30 → difuzor 500 ml ≈ 150 zile'),inp('refillLead','Reminder reumplere cu','zile înainte'),inp('visitsWeek','Vizite pe săptămână','țintă'),inp('samplesMonth','Mostre pe lună','țintă'),inp('ordersMonth','Comenzi noi pe lună','țintă'),inp('postsMonth','Postări TikTok/FB pe lună','țintă'))),
 isAdmin?h('div',{class:'panel'},h('h2',null,'Oblio și Shopify'),h('div',{class:'fgrid',style:'margin-top:10px'},txt('oblioCif','CIF firmă în Oblio'),txt('oblioSeries','Serie facturi Oblio','ex. VS'),txt('oblioVat','Cota TVA în Oblio','numele din Oblio, ex. Normala'),inp('oblioStock','Scade stocul în Oblio','1 = da, 0 = nu'),txt('shopFrom','Importă comenzi Shopify de la','AAAA-LL-ZZ'))):null,
 isAdmin?h('div',{class:'row'},h('button',{class:'b pri',onclick:()=>{const d={...S.settings};for(const k of Object.keys(f))d[k]=n2(f[k].value);for(const k of Object.keys(ft))d[k]=ft[k].value.trim();guard(()=>db.doc('settings/main').set(d),'Setări salvate');}},'Salvează setările')):null,
@@ -720,7 +721,7 @@ renderNav();
 })();
 })();
 </script>
-<script type="module" src="firebase-bridge.js?v=20261107m"></script>
+<script type="module" src="firebase-bridge.js?v=20261107n"></script>
 <script>if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
 </body>
 </html>
