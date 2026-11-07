@@ -317,7 +317,7 @@ body.locked .app{display:none}
 <div id="ovroot"></div>
 
 <div id="print"></div>
-<script src="config.js?v=20261107o"></script>
+<script src="config.js?v=20261107p"></script>
 <script>window.__vsBridge={};(function(){var p={};['user','db'].forEach(function(k){p[k]=new Promise(function(r){window.__vsBridge[k]=r;});});window.claude={use:function(n){return p[n]||Promise.resolve(null);}};})();</script>
 <script>
 (() => {
@@ -664,7 +664,7 @@ function exportVanzari(){const list=S.sales.filter(s=>inMonth(s.date)).sort((a,b
 function exportClienti(){const rows=[['Client','Tip','Oraș','Contact','Telefon','Email','Etapă','Următorul pas','Data','Mostre','Vânzări cu TVA','Responsabil']];for(const c of Object.values(S.clients).sort((a,b)=>a.name.localeCompare(b.name,'ro')))rows.push([c.name,c.kind||'',c.city||'',c.contact||'',c.phone||'',c.email||'',stLabel(c.stage||'prospect'),c.nextText||'',c.nextDate||'',S.samples.filter(s=>s.clientId===c.id).length,r2(clientRev(c.id)),personName(c.by)]);xlsx('Vivid Senses clienti',[{name:'Clienți',rows}]);}
 function exportStoc(){const rows=[['Produs','SKU','Cost achiziție','Preț vânzare','Stoc','Valoare la achiziție','Valoare la vânzare']];for(const p of Object.values(S.products).sort((a,b)=>prodLabel(a).localeCompare(prodLabel(b),'ro'))){const sk=stockOf(p.id);rows.push([prodLabel(p),p.sku||'',r2(p.cost),r2(p.price),sk,r2(Math.max(0,sk)*n2(p.cost)),r2(Math.max(0,sk)*n2(p.price))]);}xlsx('Vivid Senses stoc '+today(),[{name:'Stoc',rows}]);}
 let decFrom=null,decTo=null;
-function decDefaults(){if(decFrom&&decTo)return;const n=new Date();const prev=n.getDate()<=10;const a=prev?new Date(n.getFullYear(),n.getMonth()-1,1):new Date(n.getFullYear(),n.getMonth(),1),b=prev?new Date(n.getFullYear(),n.getMonth(),0):n;const f=x=>x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');decFrom=f(a);decTo=f(b);}
+function decDefaults(){if(decFrom&&decTo)return;const n=new Date();const prev=n.getDate()<=5;const a=prev?new Date(n.getFullYear(),n.getMonth()-1,1):new Date(n.getFullYear(),n.getMonth(),1),b=prev?new Date(n.getFullYear(),n.getMonth(),0):n;const f=x=>x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');decFrom=f(a);decTo=f(b);}
 function decont(){decDefaults();const L=S.sales.filter(s=>s.channel!=='emag');const paid=L.filter(s=>{const p=paidOn(s);return p&&p>=decFrom&&p<=decTo;}).sort((a,b)=>paidOn(a).localeCompare(paidOn(b)));const rest=L.filter(s=>s.date<=decTo&&(!paidOn(s)||paidOn(s)>decTo)).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
 const sum=a=>a.reduce((t,s)=>{const c=saleCalc(s);return {g:t.g+c.gross,np:t.np+c.np,p:t.p+c.partner};},{g:0,np:0,p:0});const P=sum(paid),R=sum(rest);const E=entitled(decTo);const bal=Math.max(0,Math.round((E.tot-paidOut())*100)/100);const tx=n2(set().payoutTax);return {paid,rest,P,R,due:bal,carry:E.carry,tax:bal*tx/100,net:bal-bal*tx/100,tx};}
 function vDecont(){const D=decont();const fr=h('input',{type:'date',value:decFrom,onchange:e=>{decFrom=e.target.value;render();}}),to=h('input',{type:'date',value:decTo,onchange:e=>{decTo=e.target.value;render();}});
@@ -721,7 +721,7 @@ renderNav();
 })();
 })();
 </script>
-<script type="module" src="firebase-bridge.js?v=20261107o"></script>
+<script type="module" src="firebase-bridge.js?v=20261107p"></script>
 <script>if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
 </body>
 </html>
