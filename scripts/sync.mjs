@@ -58,6 +58,54 @@ async function shopify() {
     refunds(first:20){legacyResourceId createdAt refundLineItems(first:50){nodes{quantity priceSet{shopMoney{amount}}
       lineItem{sku variant{selectedOptions{name value} product{handle}}}}}}
   }}}`;
+  // ---- produse: cele noi din Shopify intră automat în aplicație; prețul de vânzare se aliniază cu site-ul ----
+  const parseTitle = (t, hd, vendor) => {
+    t = String(t || '').replace(/\s+/g, ' ').trim(); hd = String(hd || '');
+    let kind = 'Difuzor';
+    if (/^rezerv/i.test(t)) kind = 'Rezervă'; else if (/^set cadou/i.test(t)) kind = 'Set cadou'; else if (/rufe/i.test(t)) kind = 'Parfum rufe';
+    else if (/s[ăa]cule[țt]/i.test(t)) kind = 'Săculeț auto'; else if (/s[ăa]pun/i.test(t)) kind = 'Săpun lichid';
+    else if (/^parfum-spray-camera|^parfum-pentru-camera/.test(hd) || /spray/i.test(t)) kind = 'Spray';
+    let n = t.replace(/[,–-]\s*\d+[.,]?\d*\s*ml\s*$/i, '').replace(/\s*\d+[.,]?\d*\s*ml\s*$/i, '');
+    n = n.replace(/^rezerv[ăa] parfum\s*[–-]\s*/i, '').replace(/^set cadou( erbal)?\s*[–-]\s*/i, '').replace(/^parfum spray camer[ăa]\s*/i, '').replace(/^parfum pentru camer[ăa]\s*/i, '').replace(/^set parfum de rufe concentrat erbal\s*[–-]\s*/i, '');
+    n = n.replace(/\s*[–-]\s*(parfum de camer[ăa]|parfum pentru rufe|s[ăa]cule[țt] parfumat auto)\s*$/i, '').replace(/[\s,–-]+$/, '').trim();
+    const line = vendor && vendor.trim() && !/vivid senses/i.test(vendor) ? vendor.trim() : /erbal/i.test(t) ? 'Erbal' : /s[ăa]pun/i.test(t) ? 'Diverse' : 'Locherber Milano';
+    return { line, name: n || t, kind };
+  };
+  const PQ = `query($after:String){products(first:50,after:$after){pageInfo{hasNextPage endCursor}nodes{handle title vendor status
+    variants(first:20){nodes{sku price selectedOptions{name value}}}}}}`;
+  let pAfter = null, pNew = 0, pUpd = 0;
+  do {
+    const d = await gql(PQ, { after: pAfter });
+    for (const pr of d.products.nodes) {
+      for (const v of pr.variants.nodes) {
+        const opt0 = ((v.selectedOptions || [])[0] || {}).value || '';
+        const opt = /^default title$/i.test(opt0) ? '' : opt0;
+        const key = pr.handle + '|' + opt;
+        const price = n2(v.price);
+        const active = pr.status === 'ACTIVE';
+        const ex = byShop[key] || (v.sku && bySku[String(v.sku).trim()]);
+        if (ex) {
+          const ch = {};
+          if (price > 0 && Math.abs(price - n2(ex.price)) > 0.004) ch.price = price;
+          if (!ex.shop) ch.shop = key;
+          if ((ex.active !== false) !== active) ch.active = active;
+          if (Object.keys(ch).length) { await fs.doc('products/' + ex.id).update({ ...ch, updated: todayRO }); Object.assign(ex, ch); pUpd++; }
+          continue;
+        }
+        const pt = parseTitle(pr.title, pr.handle, pr.vendor);
+        const sz = (opt.match(/(\d+[.,]?\d*)\s*ml/i) || String(pr.title).match(/(\d+[.,]?\d*)\s*ml/i) || [])[1];
+        const doc = { line: pt.line, name: pt.name + (opt && !/ml/i.test(opt) ? ' · ' + opt : ''), kind: pt.kind, size: sz ? n2(String(sz).replace(',', '.')) : null,
+          cost: 0, price, minStock: 0, sku: String(v.sku || '').trim(), shop: key, active, created: todayRO, updated: todayRO };
+        const ref = await fs.collection('products').add(doc);
+        const np = { id: ref.id, ...doc }; products.push(np); byShop[key] = np; if (np.sku) bySku[np.sku] = np;
+        console.log('Produs nou din Shopify:', [doc.line, doc.name, doc.kind, doc.size ? doc.size + ' ml' : ''].filter(Boolean).join(' · '), '·', price, 'lei');
+        pNew++;
+      }
+    }
+    pAfter = d.products.pageInfo.hasNextPage ? d.products.pageInfo.endCursor : null;
+  } while (pAfter);
+  console.log(`Shopify: ${pNew} produse noi, ${pUpd} actualizate (preț / stare).`);
+
   const since = addDays(todayRO, -7);
   const q = `created_at:>=${st.shopFrom} updated_at:>=${since}`;
   const match = li => {
