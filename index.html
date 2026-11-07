@@ -153,6 +153,16 @@ button.b:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-v
 button.b[disabled]{opacity:.5;cursor:default}
 label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);min-width:0}
 input,select,textarea{font:inherit;font-size:14px;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:7px 9px;min-width:0;width:100%}
+input,select{box-sizing:border-box;height:38px}
+textarea{box-sizing:border-box}
+/* iPhone: câmpurile de dată au altă înălțime și lățime decât restul; le aducem la fel */
+input[type=date],input[type=time],input[type=month]{-webkit-appearance:none;appearance:none;display:block;line-height:22px;text-align:left}
+input::-webkit-date-and-time-value{text-align:left;min-height:22px}
+input::-webkit-datetime-edit{padding:0}
+/* în ferestre: etichetă, câmp și notă pe aceleași rânduri, chiar dacă o etichetă are două rânduri */
+.modal .fgrid>label.f{display:grid;grid-row:span 3;grid-template-rows:subgrid;row-gap:4px;align-items:end}
+.modal .fgrid>label.f>.note{align-self:start}
+@media (max-width:640px){input,select{height:42px;font-size:16px}textarea{font-size:16px}}
 textarea{min-height:64px;resize:vertical}
 .fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
 /* în Setări: etichetele lungi nu mai împing câmpurile; eticheta, câmpul și nota stau pe aceleași rânduri */
@@ -298,7 +308,7 @@ body.locked .app{display:none}
 <div id="ovroot"></div>
 
 <div id="print"></div>
-<script src="config.js?v=20261107g"></script>
+<script src="config.js?v=20261107h"></script>
 <script>window.__vsBridge={};(function(){var p={};['user','db'].forEach(function(k){p[k]=new Promise(function(r){window.__vsBridge[k]=r;});});window.claude={use:function(n){return p[n]||Promise.resolve(null);}};})();</script>
 <script>
 (() => {
@@ -683,7 +693,7 @@ renderNav();
 })();
 })();
 </script>
-<script type="module" src="firebase-bridge.js?v=20261107g"></script>
+<script type="module" src="firebase-bridge.js?v=20261107h"></script>
 <script>if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
 </body>
 </html>
