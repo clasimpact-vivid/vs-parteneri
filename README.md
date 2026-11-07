@@ -54,3 +54,22 @@ Emailul pleacă de luni până sâmbătă dimineața, doar dacă există ceva de
 - `firebase-bridge.js` – autentificare, bază de date, jurnal.
 - `firestore.rules` – cine ce poate face (dacă schimbi emailul administratorului, schimbă-l și aici, și în `config.js`).
 - `scripts/digest.mjs` + `.github/workflows/digest.yml` – rezumatul zilnic.
+
+## Funcții adăugate (noiembrie 2026)
+
+- **Decont și plăți:** cota se plătește doar din încasări; registru de plăți, sold, pierdere reportată, impozit reținut, storno pentru retururi.
+- **Discount peste limită:** vânzarea partenerului intră „în așteptare” până o aprobă administratorul (Setări → Discount maxim).
+- **Facturi Oblio:** din fișa vânzării, „Emite factură în Oblio”; factura se emite în maximum 30 de minute (workflow `sync.yml`).
+- **Comenzi Shopify automat:** la fiecare 30 de minute (workflow `sync.yml`).
+- **Teren:** vizite, postări, plan vs. realizat, reumpleri estimate, stoc pe depozit / mașină, ofertă PDF.
+- **Offline și pe telefon:** aplicația se instalează pe ecranul telefonului și salvează fără semnal.
+- **Backup:** în fiecare luni, pe emailul administratorului (workflow `backup.yml`).
+
+### Secrete și variabile noi (GitHub → Settings → Secrets and variables → Actions)
+| Nume | Tip | Ce e |
+| --- | --- | --- |
+| `SHOPIFY_SHOP` | Variable | numele magazinului, fără `.myshopify.com` |
+| `SHOPIFY_CLIENT_ID` | Secret | din Dev Dashboard → aplicația ta → Settings |
+| `SHOPIFY_CLIENT_SECRET` | Secret | idem |
+| `OBLIO_EMAIL` | Secret | emailul de login Oblio |
+| `OBLIO_SECRET` | Secret | Oblio → Setări → Date cont → API secret |

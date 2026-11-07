@@ -1,0 +1,32 @@
+name: Sincronizare Shopify și Oblio
+
+on:
+  schedule:
+    # la fiecare 30 de minute (GitHub poate întârzia rulările câteva minute)
+    - cron: "*/30 * * * *"
+  workflow_dispatch: {}
+
+concurrency:
+  group: sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+        working-directory: scripts
+      - run: node sync.mjs
+        working-directory: scripts
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          SHOPIFY_SHOP: ${{ vars.SHOPIFY_SHOP }}
+          SHOPIFY_CLIENT_ID: ${{ secrets.SHOPIFY_CLIENT_ID }}
+          SHOPIFY_CLIENT_SECRET: ${{ secrets.SHOPIFY_CLIENT_SECRET }}
+          SHOPIFY_TOKEN: ${{ secrets.SHOPIFY_TOKEN }}
+          OBLIO_EMAIL: ${{ secrets.OBLIO_EMAIL }}
+          OBLIO_SECRET: ${{ secrets.OBLIO_SECRET }}

@@ -30,10 +30,36 @@ service cloud.firestore {
     match /settings/{id} { allow read: if isMember(); allow write: if isAdmin(); }
     match /salesEmag/{id} { allow read, write: if isAdmin(); }
 
+    // Partenerul nu-și poate aproba singur discountul, nu poate cere/scrie facturi și nu poate face storno.
+    function partnerSaleOk() {
+      return request.resource.data.get('approval', '') in ['', 'pending']
+          && request.resource.data.get('storno', false) == false;
+    }
+    function keepsAdminFields() {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(['invoice', 'invoiceReq', 'invoiceErr', 'approvedBy', 'storno', 'refOf', 'shopId']);
+    }
     match /sales/{id} {
       allow read: if isMember();
+      allow create: if isMember() && (isAdmin() || (isAuthor() && partnerSaleOk()
+                       && !request.resource.data.keys().hasAny(['invoice', 'invoiceReq', 'approvedBy', 'shopId'])));
+      // O vânzare aprobată poate fi marcată încasată de partener; dacă îi schimbă produsele sau prețurile, aprobarea se pierde.
+      allow update: if isAdmin() || (isMember() && resource.data.by == request.auth.uid && keepsAuthor() && keepsAdminFields()
+                       && request.resource.data.get('storno', false) == false
+                       && (partnerSaleOk() || (request.resource.data.get('approval', '') == resource.data.get('approval', '')
+                                               && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['lines', 'approval']))));
+      allow delete: if isAdmin();
+    }
+    match /payouts/{id} { allow read: if isMember(); allow write: if isAdmin(); }
+    match /visits/{id} {
+      allow read: if isMember();
       allow create: if isMember() && (isAdmin() || isAuthor());
-      allow update: if isAdmin() || (isMember() && resource.data.by == request.auth.uid && keepsAuthor());
+      allow update: if isAdmin() || (isMember() && keepsAuthor() && resource.data.by == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+    match /posts/{id} {
+      allow read: if isMember();
+      allow create: if isMember() && (isAdmin() || isAuthor());
+      allow update: if isAdmin() || (isMember() && keepsAuthor() && resource.data.by == request.auth.uid);
       allow delete: if isAdmin();
     }
     match /moves/{id} {

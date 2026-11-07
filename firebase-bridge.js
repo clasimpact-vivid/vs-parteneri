@@ -2,13 +2,17 @@
 import { initializeApp, deleteApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, sendPasswordResetEmail,
   createUserWithEmailAndPassword, updatePassword } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import { getFirestore, collection, doc, onSnapshot, addDoc, setDoc, updateDoc, deleteDoc, getDoc,
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, doc, onSnapshot, addDoc, setDoc, updateDoc, deleteDoc, getDoc,
   serverTimestamp, query, orderBy, limit } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 const CFG = window.VS_CONFIG;
 const app = initializeApp(CFG.firebase);
 const auth = getAuth(app);
-const fs = getFirestore(app);
+// Datele se păstrează și pe telefon: aplicația merge fără semnal, iar modificările pleacă singure când revine internetul.
+const fs = initializeFirestore(app, { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) });
+// Fără semnal, scrierea e salvată local imediat; nu așteptăm confirmarea serverului ca să nu blocăm ecranul.
+const settle = p => navigator.onLine ? p : (p.catch(e => console.warn('sincronizare amânată', e)), new Promise(r => setTimeout(r, 300)).then(() => { offlineNote(); }));
+let offT = 0; function offlineNote() { if (Date.now() - offT < 8000) return; offT = Date.now(); const t = document.createElement('div'); t.className = 'toast'; t.textContent = 'Fără semnal: salvat pe telefon, se trimite automat când revine internetul.'; document.body.appendChild(t); setTimeout(() => t.remove(), 4500); }
 const ADMIN = (CFG.adminEmails || []).map(e => e.toLowerCase());
 
 const $ = s => document.querySelector(s);
@@ -50,14 +54,14 @@ const wrapSnap = s => ({ docs: s.docs.map(d => ({ id: d.id, data: () => d.data()
 const db = {
   collection: p => ({
     onSnapshot: (cb, err) => onSnapshot(collection(fs, p), s => cb(wrapSnap(s)), err),
-    add: async d => { const r = await addDoc(collection(fs, p), d); audit('adăugat', p + '/' + r.id, d); return { id: r.id }; }
+    add: async d => { const ref = doc(collection(fs, p)); await settle(setDoc(ref, d)); audit('adăugat', p + '/' + ref.id, d); return { id: ref.id }; }
   }),
   doc: p => {
     const ref = doc(fs, ...p.split('/'));
     return {
       onSnapshot: (cb, err) => onSnapshot(ref, d => cb({ exists: d.exists(), data: () => d.data() }), err),
-      set: async d => { await setDoc(ref, d); audit('modificat', p, d); },
-      update: async d => { await updateDoc(ref, d); audit('modificat', p, d); },
+      set: async d => { await settle(setDoc(ref, d)); audit('modificat', p, d); },
+      update: async d => { await settle(updateDoc(ref, d)); audit('modificat', p, d); },
       delete: async () => {
         let before = null; try { before = (await getDoc(ref)).data(); } catch (e) {}
         await deleteDoc(ref); audit('șters', p, before);

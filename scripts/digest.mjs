@@ -11,7 +11,7 @@ const sa = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT || '{}');
 admin.initializeApp({ credential: admin.credential.cert(sa) });
 const fs = admin.firestore();
 
-const DEF = { vat: 21, micro: 1, shareSite: 50, shareAgent: 50, shareEmag: 0, payFee: 1.9, emagFee: 21 };
+const DEF = { vat: 21, micro: 1, shareSite: 50, shareAgent: 50, shareEmag: 0, payFee: 1.9, emagFee: 21, daysPer100: 30, refillLead: 14 };
 const FU = [[3, 'Apel ziua 3'], [10, 'Vizită ziua 10'], [21, 'Decizie ziua 21']];
 const CH = { site: 'Site', agent: 'Agent', emag: 'eMAG' };
 const n2 = v => Number.isFinite(+v) ? +v : 0;
@@ -64,6 +64,21 @@ for (const s of [...sales, ...salesEmag]) {
   const late = due < today;
   tasks.push({ due, who: s.by, only: true, text: `<b style="color:#b4413a">încasare ${late ? 'întârziată' : 'scadentă azi'}</b> · ${esc((C[s.clientId] || {}).name || 'Client')} · ${lei(saleCalc(s).gross)} (vânzare din ${fmtD(s.date)}, scadent ${fmtD(due)})`, raw: true });
 }
+// Vânzări cu discount care așteaptă aprobare (doar administratorul)
+for (const s of sales) if (s.approval === 'pending') tasks.push({ due: s.date, who: null, adminOnly: true, raw: true,
+  text: `<b style="color:#a66b00">de aprobat</b> · discount peste limită · ${esc((C[s.clientId] || {}).name || 'Client')} · ${lei(saleCalc(s).gross)}` });
+// Reumpleri: clienți care rămân curând fără parfum
+const lastsOf = p => { if (!p) return 0; if (n2(p.lastsDays) > 0) return n2(p.lastsDays); if (!['Difuzor', 'Rezervă'].includes(p.kind)) return 0; return Math.round(n2(p.size) / 100 * n2(st.daysPer100)); };
+const lastByClient = {};
+for (const s of sales) { if (!s.clientId || s.storno) continue; if (!lastByClient[s.clientId] || s.date > lastByClient[s.clientId].date) lastByClient[s.clientId] = s; }
+for (const [cid, s] of Object.entries(lastByClient)) {
+  const c = C[cid]; if (!c || c.stage === 'pierdut') continue;
+  let days = 0; for (const l of s.lines || []) days = Math.max(days, lastsOf(P[l.productId]));
+  if (!days) continue;
+  const ends = addDays(s.date, days), remind = addDays(ends, -n2(st.refillLead));
+  if (remind <= today && ends >= addDays(today, -30)) tasks.push({ due: remind, who: c.by, only: true, raw: true,
+    text: `<b style="color:#8a6d1f">reumplere</b> · ${esc(c.name)} rămâne fără parfum pe la ${fmtD(ends)}${c.phone ? ' · ' + esc(c.phone) : ''}` });
+}
 tasks.sort((a, b) => a.due < b.due ? -1 : 1);
 
 const low = products.filter(p => p.active !== false && n2(p.minStock) > 0 && stockOf(p.id) <= n2(p.minStock));
@@ -73,7 +88,7 @@ function render(u) {
   const ySales = (isAdmin ? [...sales, ...salesEmag] : sales).filter(s => s.date === yesterday);
   const rows = ySales.map(s => { const c = saleCalc(s); return `<tr><td>${esc(CH[s.channel] || s.channel)}</td><td>${esc((C[s.clientId] || {}).name || '–')}</td><td>${esc((s.lines || []).map(l => l.qty + '× ' + pname(l.productId)).join(', '))}</td><td align="right">${lei(c.gross)}</td><td align="right">${lei(isAdmin ? c.np : c.partner)}</td></tr>`; }).join('');
   const tot = ySales.reduce((t, s) => { const c = saleCalc(s); return { g: t.g + c.gross, p: t.p + (isAdmin ? c.np : c.partner) }; }, { g: 0, p: 0 });
-  const myTasks = tasks.filter(t => isAdmin || !t.only || t.who === u.id);
+  const myTasks = tasks.filter(t => isAdmin || (!t.adminOnly && (!t.only || t.who === u.id)));
   const tk = myTasks.slice(0, 30).map(t => t.raw ? `<li>${t.text}</li>` : `<li>${t.due < today ? '<b style="color:#b4413a">întârziat</b> · ' : ''}${esc(t.text)}</li>`).join('');
   const test = !!process.env.TEST_ONLY_ADMIN && isAdmin;
   if (!test && !myTasks.length && !ySales.length && !(isAdmin && low.length)) return null;
@@ -95,7 +110,7 @@ for (const u of users) {
   if (process.env.TEST_ONLY_ADMIN && u.role !== 'admin') continue;
   const html = render(u);
   if (!html) continue;
-  const n = tasks.filter(t => u.role === 'admin' || !t.only || t.who === u.id).length;
+  const n = tasks.filter(t => u.role === 'admin' || (!t.adminOnly && (!t.only || t.who === u.id))).length;
   const subject = `Vivid Senses · ${n} de făcut azi`;
   if (process.env.DRY_RUN) { console.log('---', u.email, subject); console.log(html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').slice(0, 600)); continue; }
   const r = await fetch('https://api.resend.com/emails', {
