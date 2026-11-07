@@ -227,6 +227,12 @@ body.locked .app{display:none}
   main > .row.between > div:first-child{flex:1 1 100%}
 }
 @media (max-width:640px){
+  .dctl{display:grid!important;grid-template-columns:1fr 1fr;gap:10px;flex:1 1 100%;width:100%}
+  .dctl>.f{min-width:0;margin:0}
+  .dctl input{width:100%;min-width:0;box-sizing:border-box;-webkit-appearance:none;appearance:none}
+  .dctl>.b{width:100%;margin:0;height:42px!important}
+  .dctl>.b:last-child:nth-child(odd){grid-column:1/-1}
+  .panel>.row.between>h2+.row, .panel>.row.between>div+.row{flex:1 1 100%}
   main .tw{border:0;background:none;overflow:visible;border-radius:0}
   main .tw table, main .tw tbody, main .tw tr, main .tw td{display:block;width:100%}
   main .tw thead{display:none}
@@ -287,7 +293,7 @@ body.locked .app{display:none}
 <div id="ovroot"></div>
 
 <div id="print"></div>
-<script src="config.js?v=20261107d"></script>
+<script src="config.js?v=20261107e"></script>
 <script>window.__vsBridge={};(function(){var p={};['user','db'].forEach(function(k){p[k]=new Promise(function(r){window.__vsBridge[k]=r;});});window.claude={use:function(n){return p[n]||Promise.resolve(null);}};})();</script>
 <script>
 (() => {
@@ -609,7 +615,7 @@ function vDecont(){const D=decont();const fr=h('input',{type:'date',value:decFro
 const q=(lab,days)=>h('button',{class:'b sm',onclick:()=>{const n=new Date();let a,b;if(days==='prev'){a=new Date(n.getFullYear(),n.getMonth()-1,1);b=new Date(n.getFullYear(),n.getMonth(),0);}else{a=new Date(n.getFullYear(),n.getMonth(),1);b=n;}const f=x=>x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');decFrom=f(a);decTo=f(b);render();}},lab);
 const row=s=>{const c=saleCalc(s);return h('tr',null,h('td',null,fmtD(s.date)),h('td',null,(S.clients[s.clientId]||{}).name||'–'),h('td',{class:'wrapc'},(s.lines||[]).map(l=>l.qty+'× '+pname(l.productId)).join(', ')),h('td',null,paidOn(s)?'încasat '+fmtD(paidOn(s)):payPill(s)),h('td',{class:'num'},lei(c.gross)),h('td',{class:'num'},lei(c.partner)));};
 const tbl=a=>a.length?h('div',{class:'tw',style:'margin-top:8px'},h('table',null,h('thead',null,h('tr',null,['Vânzare','Client','Produse','Încasare','Valoare','Cotă partener'].map((x,i)=>h('th',{class:i>=4?'num':null},x)))),h('tbody',null,a.map(row)))):h('p',{class:'note',style:'margin-top:6px'},'Nimic.');
-return h('div',{class:'panel'},h('div',{class:'row between'},h('div',null,h('h2',null,'Decont partener'),h('p',{class:'note'},'Cota se plătește doar din banii încasați. Alegi intervalul: vezi ce s-a încasat în el și ce rămâne restant la sfârșitul lui.')),h('div',{class:'row',style:'align-items:end'},h('label',{class:'f'},'De la',fr),h('label',{class:'f'},'Până la',to),q('Luna trecută','prev'),q('Luna asta','cur'),h('button',{class:'b',onclick:printDecont},'Decont PDF'),isAdmin?h('button',{class:'b pri',onclick:()=>payoutModal(D)},'Înregistrează plata'):null)),
+return h('div',{class:'panel'},h('div',{class:'row between'},h('div',null,h('h2',null,'Decont partener'),h('p',{class:'note'},'Cota se plătește doar din banii încasați. Alegi intervalul: vezi ce s-a încasat în el și ce rămâne restant la sfârșitul lui.')),h('div',{class:'row dctl',style:'align-items:end'},h('label',{class:'f'},'De la',fr),h('label',{class:'f'},'Până la',to),q('Luna trecută','prev'),q('Luna asta','cur'),h('button',{class:'b',onclick:printDecont},'Decont PDF'),isAdmin?h('button',{class:'b pri',onclick:()=>payoutModal(D)},'Înregistrează plata'):null)),
 h('div',{class:'kpis',style:'margin-top:12px'},h('div',{class:'kpi hl'},h('span',{class:'l'},'Sold de plătit la '+fmtD(decTo)),h('span',{class:'v'},lei(D.due)),h('span',{class:'n'},'brut · impozit '+D.tx+'%: '+lei(D.tax)+' · net '+lei(D.net)+(D.carry<0?' · pierdere reportată '+lei(-D.carry):''))),h('div',{class:'kpi'},h('span',{class:'l'},'Cota din încasările intervalului'),h('span',{class:'v'},lei(D.P.p)),h('span',{class:'n'},D.paid.length+' vânzări încasate · plătit până acum '+lei(paidOut()))),h('div',{class:'kpi'},h('span',{class:'l'},'Încasat în interval'),h('span',{class:'v'},lei(D.P.g)),h('span',{class:'n'},'profit net '+lei(D.P.np))),h('div',{class:'kpi'},h('span',{class:'l'},'Restant la '+fmtD(decTo)),h('span',{class:'v'},lei(D.R.g)),h('span',{class:'n'},D.rest.length+' vânzări · cota '+lei(Math.max(0,D.R.p))+' după încasare'))),
 h('h3',{style:'margin-top:14px;font-size:14px'},'Încasate în interval'),tbl(D.paid),h('h3',{style:'margin-top:14px;font-size:14px'},'Restante la '+fmtD(decTo)),tbl(D.rest),h('h3',{style:'margin-top:14px;font-size:14px'},'Plăți făcute partenerului'),S.payouts.length?h('div',{class:'tw',style:'margin-top:8px'},h('table',null,h('thead',null,h('tr',null,['Data plății','Pentru încasările','Brut','Impozit','Net virat','Notă',''].map((x,i)=>h('th',{class:i>=2&&i<=4?'num':null},x)))),h('tbody',null,[...S.payouts].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(p=>h('tr',null,h('td',null,fmtD(p.date)),h('td',null,p.from&&p.to?fmtD(p.from)+' – '+fmtD(p.to):'–'),h('td',{class:'num'},lei(p.gross,2)),h('td',{class:'num'},lei(p.tax,2)),h('td',{class:'num'},h('b',null,lei(p.net,2))),h('td',null,p.note||''),h('td',null,isAdmin?h('button',{class:'b sm',onclick:e=>confirmBtn(e.target,()=>guard(()=>db.doc('payouts/'+p.id).delete(),'Plată ștearsă'))},'Șterge'):null)))))):h('p',{class:'note',style:'margin-top:6px'},'Nicio plată înregistrată încă.'));}
 function payoutModal(D){const g=h('input',{type:'number',step:'0.01',value:String(Math.round(D.due*100)/100)}),tx=h('input',{type:'number',step:'0.01',value:String(Math.round(D.tax*100)/100)}),nt=h('input',{type:'number',step:'0.01',value:String(Math.round(D.net*100)/100)}),dt=h('input',{type:'date',value:today()}),no=h('input',{placeholder:'ex. transfer BT, OP nr.'});const rc=()=>{const v=n2(g.value);tx.value=String(Math.round(v*n2(set().payoutTax))/100);nt.value=String(Math.round((v-n2(tx.value))*100)/100);};g.oninput=rc;tx.oninput=()=>{nt.value=String(Math.round((n2(g.value)-n2(tx.value))*100)/100);};
@@ -659,7 +665,7 @@ renderNav();
 })();
 })();
 </script>
-<script type="module" src="firebase-bridge.js?v=20261107d"></script>
+<script type="module" src="firebase-bridge.js?v=20261107e"></script>
 <script>if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
 </body>
 </html>
