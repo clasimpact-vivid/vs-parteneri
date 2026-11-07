@@ -241,7 +241,12 @@ body.locked .app{display:none}
   #print .pt{font-family:var(--display);font-size:20pt}
   #print table{width:100%;border-collapse:collapse;font-size:9.5pt}
   #print th,#print td{border-bottom:.5pt solid #999;padding:4pt;text-align:left;white-space:normal;background:none;color:#000;position:static}
-  #print td.num{text-align:right}
+  #print td.num{text-align:right;white-space:nowrap}
+#print thead th{background:#efede8!important;border-top:.75pt solid #000;border-bottom:.75pt solid #000;border-left:.5pt solid #999;font-size:8pt;letter-spacing:.04em;text-transform:uppercase;vertical-align:bottom;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+#print thead th:first-child{border-left:.75pt solid #000}#print thead th:last-child{border-right:.75pt solid #000}
+#print tbody td,#print tfoot td{border-left:.5pt solid #ccc}#print tbody td:first-child,#print tfoot td:first-child{border-left:.75pt solid #000}#print tbody td:last-child,#print tfoot td:last-child{border-right:.75pt solid #000}
+#print tfoot td{border-bottom:.75pt solid #000}
+#print h3{font-size:11pt;margin:14pt 0 6pt}
   #print tfoot td{font-weight:700;border-top:1pt solid #000}
   #print .sig{display:flex;justify-content:space-between;margin-top:36pt}
   #print .sig div{width:45%;border-top:.5pt solid #000;padding-top:4pt}
@@ -322,7 +327,7 @@ body.locked .app{display:none}
 <div id="ovroot"></div>
 
 <div id="print"></div>
-<script src="config.js?v=20261107q"></script>
+<script src="config.js?v=20261107r"></script>
 <script>window.__vsBridge={};(function(){var p={};['user','db'].forEach(function(k){p[k]=new Promise(function(r){window.__vsBridge[k]=r;});});window.claude={use:function(n){return p[n]||Promise.resolve(null);}};})();</script>
 <script>
 (() => {
@@ -546,10 +551,10 @@ const draw=()=>{box.replaceChildren(...L.map((l,i)=>{const ps=prodSelect('o-p'+i
 const sum=()=>{tot.textContent='Total ofertă: '+lei(L.reduce((t,l)=>t+n2(l.qty)*n2(l.unitPrice),0),2)+' cu TVA';};draw();sum();
 modal([h('h2',null,'Ofertă pentru '+(c.name||'client')),box,h('button',{class:'b sm',onclick:()=>{L.push({productId:'',qty:1,unitPrice:0});draw();}},'+ încă un produs'),tot,h('div',{class:'fgrid'},h('label',{class:'f'},'Valabilă (zile)',val)),h('label',{class:'f'},'Condiții / notă',no)],[h('button',{class:'b',onclick:close},'Renunță'),h('button',{class:'b pri',onclick:async()=>{const ok=L.filter(l=>l.productId&&n2(l.qty)>0);if(!ok.length){toast('Adaugă cel puțin un produs.');return;}const total=ok.reduce((t,l)=>t+n2(l.qty)*n2(l.unitPrice),0);if(c.id&&c.stage!=='client')await guard(()=>db.doc('clients/'+c.id).update({stage:'oferta',notes:[...(c.notes||[]),{d:today(),by:me.id,t:'Ofertă trimisă: '+lei(total)+' · '+ok.map(l=>l.qty+'× '+pname(l.productId)).join(', ')}].slice(-200)}));printOffer(c,ok,n2(val.value)||14,no.value.trim());close();}},'Ofertă PDF')]);}
 function printOffer(c,L,days,note){const vat=1+n2(set().vat)/100;const tot=L.reduce((t,l)=>t+n2(l.qty)*n2(l.unitPrice),0);const pr=$('#print');const who=(window.VSAdmin&&VSAdmin.users&&VSAdmin.users()[me.id])||{};
-pr.replaceChildren(h('div',{class:'ph'},h('div',null,h('div',{class:'pt'},'Ofertă'),h('div',null,'Vivid Senses · parfumuri de ambient premium')),h('div',{style:'text-align:right'},'ETONDALE 2017 SRL',h('br'),'CUI RO37488718',h('br'),'vividsenses.ro')),
+pr.replaceChildren(...[h('div',{class:'ph'},h('div',null,h('div',{class:'pt'},'Ofertă'),h('div',null,'Vivid Senses · parfumuri de ambient premium')),h('div',{style:'text-align:right'},'ETONDALE 2017 SRL',h('br'),'CUI RO37488718',h('br'),'vividsenses.ro')),
 h('p',null,h('b',null,'Către: '),c.firm||c.name||'',c.cui?' · CUI '+c.cui:'',c.city?' · '+c.city:'',c.contact?h('span',null,h('br'),'În atenția: '+c.contact):null),h('p',null,'Data: '+fmtD(today())+' · valabilă până la '+fmtD(addDays(today(),days))),
 h('table',null,h('thead',null,h('tr',null,['Produs','Buc.','Preț/buc fără TVA','Preț/buc cu TVA','Total cu TVA'].map(x=>h('th',null,x)))),h('tbody',null,L.map(l=>h('tr',null,h('td',null,pname(l.productId)),h('td',{class:'num'},l.qty),h('td',{class:'num'},lei(n2(l.unitPrice)/vat,2)),h('td',{class:'num'},lei(l.unitPrice,2)),h('td',{class:'num'},lei(n2(l.qty)*n2(l.unitPrice),2))))),h('tfoot',null,h('tr',null,h('td',{colspan:'4'},'Total (TVA inclus)'),h('td',{class:'num'},lei(tot,2))))),
-note?h('p',null,note):null,h('p',null,'Persoană de contact: '+(who.name||me.name||'')+(who.email?' · '+who.email:'')+'.'),h('p',{style:'font-size:11px;color:#777'},'Prețurile includ TVA '+set().vat+'%. Ofertă fără caracter de factură.'));setTimeout(()=>window.print(),50);}
+note?h('p',null,note):null,h('p',null,'Persoană de contact: '+(who.name||me.name||'')+(who.email?' · '+who.email:'')+'.'),h('p',{style:'font-size:11px;color:#777'},'Prețurile includ TVA '+set().vat+'%. Ofertă fără caracter de factură.')].filter(Boolean));setTimeout(()=>window.print(),50);}
 function vVanzari(){const list=S.sales.filter(s=>inMonth(s.date)&&match((S.clients[s.clientId]||{}).name||'',(s.lines||[]).map(l=>pname(l.productId)).join(' '),CH[s.channel]||'',s.note||'')).sort((a,b)=>(b.date||'').localeCompare(a.date||''));const a=monthAgg();
 const head=h('div',{class:'row between'},h('div',null,h('div',{class:'eyebrow'},'Transparență totală'),h('h1',null,'Vânzări'),h('p',{class:'sub'},'Fiecare comandă cu calculul ei complet. Comenzile de pe site și cele aduse de agent se împart '+set().shareSite+'/'+(100-set().shareSite)+(isAdmin?'; cele de pe eMAG rămân la Vivid Senses și nu le vede partenerul.':'.'))),h('div',{class:'row'},monthPicker(),h('button',{class:'b pri',onclick:()=>saleModal()},'Adaugă vânzare')));
 const sum=h('div',{class:'kpis'},[['Vânzări cu TVA',lei(a.gross)],['TVA de plată',lei(a.gross-a.net)],['Cost marfă',lei(a.cogs)],['Comisioane + transport',lei(a.fees+a.ship)],['Profit net',lei(a.np)],['Cotă partener (încasat)',lei(a.partnerPaid),1],['Cotă Vivid Senses',lei(a.alex)]].map(([l,v,hl])=>h('div',{class:'kpi'+(hl?' hl':'')},h('span',{class:'l'},l),h('span',{class:'v'},v))));
@@ -699,19 +704,19 @@ function payoutModal(D){const g=h('input',{type:'number',step:'0.01',value:Strin
 modal([h('h2',null,'Înregistrează plata către partener'),h('p',{class:'note'},'Pentru încasările '+fmtD(decFrom)+' – '+fmtD(decTo)+'. Soldul scade cu suma brută; aplicația nu te lasă să plătești de două ori același sold.'),h('div',{class:'fgrid'},h('label',{class:'f'},'Data plății',dt),h('label',{class:'f'},'Cotă brută',g),h('label',{class:'f'},'Impozit reținut',tx),h('label',{class:'f'},'Net virat',nt)),h('label',{class:'f'},'Notă',no)],[h('button',{class:'b',onclick:close},'Renunță'),h('button',{class:'b pri',onclick:async()=>{if(!(n2(g.value)>0)){toast('Suma trebuie să fie mai mare ca 0.');return;}await guard(()=>db.collection('payouts').add({date:dt.value||today(),from:decFrom,to:decTo,gross:n2(g.value),tax:n2(tx.value),net:n2(nt.value),note:no.value.trim(),by:me.id}),'Plată înregistrată');close();}},'Salvează plata')]);}
 function printDecont(){const D=decont();const st=set();const pr=$('#print');const rows=(a,paid)=>a.map(s=>{const c=saleCalc(s);return h('tr',null,h('td',null,fmtD(s.date)),h('td',null,CH[s.channel]),h('td',null,(S.clients[s.clientId]||{}).name||'–'),h('td',null,(s.lines||[]).map(l=>l.qty+'× '+pname(l.productId)).join(', ')),h('td',null,paidOn(s)&&paid?fmtD(paidOn(s)):'neîncasat'),h('td',{class:'num'},lei(c.gross,2)),h('td',{class:'num'},lei(c.np,2)),h('td',{class:'num'},lei(c.partner,2)));});
 const head=h('thead',null,h('tr',null,['Vânzare','Canal','Client','Produse','Încasat','Valoare','Profit net','Cota partener'].map(x=>h('th',null,x))));
-pr.replaceChildren(h('div',{class:'ph'},h('div',null,h('div',{class:'pt'},'Decont'),h('div',null,'Asocierea în participațiune Vivid Senses · încasări '+fmtD(decFrom)+' – '+fmtD(decTo))),h('div',{style:'text-align:right'},'ETONDALE 2017 SRL',h('br'),'CUI RO37488718')),
+pr.replaceChildren(...[h('div',{class:'ph'},h('div',null,h('div',{class:'pt'},'Decont'),h('div',null,'Asocierea în participațiune Vivid Senses · încasări '+fmtD(decFrom)+' – '+fmtD(decTo))),h('div',{style:'text-align:right'},'ETONDALE 2017 SRL',h('br'),'CUI RO37488718')),
 h('h3',null,'Încasate în interval'),h('table',null,head,h('tbody',null,rows(D.paid,true)),h('tfoot',null,h('tr',null,h('td',{colspan:'5'},'Total încasat'),h('td',{class:'num'},lei(D.P.g,2)),h('td',{class:'num'},lei(D.P.np,2)),h('td',{class:'num'},lei(D.due,2))))),
 D.rest.length?h('h3',null,'Restante la '+fmtD(decTo)+' (cota se plătește după încasare)'):null,D.rest.length?h('table',null,head.cloneNode(true),h('tbody',null,rows(D.rest,false)),h('tfoot',null,h('tr',null,h('td',{colspan:'5'},'Total restant'),h('td',{class:'num'},lei(D.R.g,2)),h('td',{class:'num'},lei(D.R.np,2)),h('td',{class:'num'},lei(Math.max(0,D.R.p),2))))):null,
 h('p',null,'Sold de plătit partenerului la '+fmtD(decTo)+': ',h('b',null,lei(D.due,2)),' brut; impozit reținut '+D.tx+'%: '+lei(D.tax,2)+'; net de virat: ',h('b',null,lei(D.net,2)),'. Plătit anterior: '+lei(paidOut(),2)+'. Cota se calculează conform contractului de asociere în participațiune ('+st.shareSite+'% din profitul net al comenzilor de pe site și al celor aduse de partener) și se datorează doar pentru sumele încasate efectiv de la clienți. '+(D.carry<0?'Pierdere reportată din lunile anterioare: '+lei(-D.carry,2)+'. ':'')+'Impozitul aferent se reține de ETONDALE 2017 SRL la plată.'),
-h('div',{class:'sig'},h('div',null,'Asociatul administrator',h('br'),'ETONDALE 2017 SRL'),h('div',null,'Asociatul',h('br'),'Nume și semnătură')));
+h('div',{class:'sig'},h('div',null,'Asociatul administrator',h('br'),'ETONDALE 2017 SRL'),h('div',null,'Asociatul',h('br'),'Nume și semnătură'))].filter(Boolean));
 setTimeout(()=>window.print(),50);}
 function printDecontOld(){const list=S.sales.filter(s=>inMonth(s.date)&&s.channel!=='emag').sort((a,b)=>(a.date||'').localeCompare(b.date||''));let np=0,pt=0,g=0;const st=set();
 const ml=month?new Date(month+'-15').toLocaleDateString('ro-RO',{month:'long',year:'numeric'}):'toată perioada';
-const pr=$('#print');pr.replaceChildren(h('div',{class:'ph'},h('div',null,h('div',{class:'pt'},'Decont lunar'),h('div',null,'Asocierea în participațiune Vivid Senses · '+ml)),h('div',{style:'text-align:right'},'ETONDALE 2017 SRL',h('br'),'CUI RO37488718')),
+const pr=$('#print');pr.replaceChildren(...[h('div',{class:'ph'},h('div',null,h('div',{class:'pt'},'Decont lunar'),h('div',null,'Asocierea în participațiune Vivid Senses · '+ml)),h('div',{style:'text-align:right'},'ETONDALE 2017 SRL',h('br'),'CUI RO37488718')),
 h('table',null,h('thead',null,h('tr',null,['Data','Canal','Client','Produse','Vânzare','Profit net','Cota partener'].map(x=>h('th',null,x)))),h('tbody',null,list.map(s=>{const c=saleCalc(s);np+=c.np;pt+=c.partner;g+=c.gross;return h('tr',null,h('td',null,fmtD(s.date)),h('td',null,CH[s.channel]),h('td',null,(S.clients[s.clientId]||{}).name||'–'),h('td',null,(s.lines||[]).map(l=>l.qty+'× '+pname(l.productId)).join(', ')),h('td',{class:'num'},lei(c.gross,2)),h('td',{class:'num'},lei(c.np,2)),h('td',{class:'num'},lei(c.partner,2)));})),
 h('tfoot',null,h('tr',null,h('td',{colspan:'4'},'Total'),h('td',{class:'num'},lei(g,2)),h('td',{class:'num'},lei(np,2)),h('td',{class:'num'},lei(Math.max(0,pt),2))))),
 h('p',null,'Cota partenerului se calculează conform contractului de asociere în participațiune ('+st.shareSite+'% din profitul net al comenzilor de pe site și al celor aduse de partener). '+(pt<0?'Rezultatul lunii este negativ: pierderea se reportează în luna următoare. ':'')+'Impozitul aferent se reține de ETONDALE 2017 SRL la plată.'),
-h('div',{class:'sig'},h('div',null,'Asociatul administrator',h('br'),'ETONDALE 2017 SRL'),h('div',null,'Asociatul',h('br'),'Nume și semnătură')));
+h('div',{class:'sig'},h('div',null,'Asociatul administrator',h('br'),'ETONDALE 2017 SRL'),h('div',null,'Asociatul',h('br'),'Nume și semnătură'))].filter(Boolean));
 setTimeout(()=>window.print(),50);}
 
 // ---------- modal ----------
@@ -742,7 +747,7 @@ renderNav();
 })();
 })();
 </script>
-<script type="module" src="firebase-bridge.js?v=20261107q"></script>
+<script type="module" src="firebase-bridge.js?v=20261107r"></script>
 <script>if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
 </body>
 </html>
