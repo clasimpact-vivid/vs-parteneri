@@ -51,7 +51,6 @@ async function shopify() {
   };
   const Q = `query($q:String,$after:String){orders(first:40,after:$after,query:$q,sortKey:UPDATED_AT){pageInfo{hasNextPage endCursor}nodes{
     legacyResourceId name processedAt cancelledAt test displayFinancialStatus totalShippingPriceSet{shopMoney{amount}}
-    customer{displayName} billingAddress{company name city}
     lineItems(first:50){nodes{quantity title variantTitle sku
       discountedUnitPriceAfterAllDiscountsSet{shopMoney{amount}} originalUnitPriceSet{shopMoney{amount}}
       variant{selectedOptions{name value} product{handle}}}}
@@ -91,7 +90,7 @@ async function shopify() {
           unitPrice: n2((li.discountedUnitPriceAfterAllDiscountsSet || li.originalUnitPriceSet).shopMoney.amount),
           unitCost: p ? (n2(oldCost[p.id]) || n2(p.cost)) : 0 });
       }
-      const who = (o.billingAddress && (o.billingAddress.company || o.billingAddress.name)) || (o.customer && o.customer.displayName) || '';
+      const who = '';
       // Transport: dacă clientul l-a plătit (comenzi sub pragul de livrare gratuită), firma suportă doar diferența până la costul curierului.
       const charged = n2(o.totalShippingPriceSet && o.totalShippingPriceSet.shopMoney.amount);
       const shipCost = Math.max(0, Math.round((n2(st.siteShip) - charged) * 100) / 100);
