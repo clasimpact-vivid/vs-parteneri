@@ -127,6 +127,11 @@ h2{font-family:var(--display);font-weight:500;font-size:19px;margin:0 0 4px;text
 .kpi[data-tip] .l::after{content:'i';display:inline-grid;place-items:center;width:14px;height:14px;margin-left:6px;border-radius:50%;border:1px solid currentColor;font-size:9.5px;font-style:italic;font-family:Georgia,serif;letter-spacing:0;text-transform:none;opacity:.55;vertical-align:1px}
 .kpi[data-tip]:hover::after,.kpi[data-tip]:focus::after{content:attr(data-tip);position:absolute;top:calc(100% + 8px);left:0;width:min(290px,86vw);background:#1c1b18;color:#f2ede3;font-size:12.5px;line-height:1.5;letter-spacing:0;text-transform:none;font-weight:400;padding:10px 12px;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.18);z-index:40;white-space:normal}
 .kpi.tr[data-tip]:hover::after,.kpi.tr[data-tip]:focus::after{left:auto;right:0}
+.dwrap{position:relative;display:block;min-width:0}
+.dwrap>input[type=text]{width:100%;padding-right:36px}
+.dwrap>input.dpick{position:absolute;right:1px;top:1px;bottom:1px;width:34px;height:auto!important;padding:0;border:0;background:transparent;opacity:0;cursor:pointer;z-index:2}
+.dwrap::after{content:'';position:absolute;right:11px;top:50%;width:14px;height:14px;transform:translateY(-50%);pointer-events:none;opacity:.6;background:no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2'%3E%3Crect x='3' y='5' width='18' height='16' rx='2'/%3E%3Cpath d='M3 10h18M8 3v4M16 3v4'/%3E%3C/svg%3E")}
+.dwrap>input.dpick::-webkit-calendar-picker-indicator{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
 .prog .bar{height:7px;border-radius:9px;background:var(--line);margin-top:6px;overflow:hidden}.prog .bar i{display:block;height:100%;border-radius:9px}
 details.panel summary::marker{color:var(--gold)}
 .grid{display:grid;gap:14px}
@@ -317,7 +322,7 @@ body.locked .app{display:none}
 <div id="ovroot"></div>
 
 <div id="print"></div>
-<script src="config.js?v=20261107p"></script>
+<script src="config.js?v=20261107q"></script>
 <script>window.__vsBridge={};(function(){var p={};['user','db'].forEach(function(k){p[k]=new Promise(function(r){window.__vsBridge[k]=r;});});window.claude={use:function(n){return p[n]||Promise.resolve(null);}};})();</script>
 <script>
 (() => {
@@ -343,7 +348,7 @@ const lei=(v,d=0)=>(n2(v)).toLocaleString('ro-RO',{minimumFractionDigits:d,maxim
 const pct=v=>(Number.isFinite(v)?v.toLocaleString('ro-RO',{maximumFractionDigits:1}):'–')+'%';
 const today=()=>new Date().toISOString().slice(0,10);
 const addDays=(d,k)=>{const x=new Date(d+'T12:00:00');x.setDate(x.getDate()+k);return x.toISOString().slice(0,10);};
-const fmtD=d=>d?new Date(d+'T12:00:00').toLocaleDateString('ro-RO',{day:'numeric',month:'short'}):'–';
+const fmtD=d=>d?String(d).slice(0,10).split('-').reverse().join('/'):'–';
 const pname=id=>{const p=S.products[id];return p?prodLabel(p):'(produs șters)';};
 function prodLabel(p){return [p.line&&p.line!=='Locherber Milano'?p.line:null,p.name,p.kind&&p.kind!=='Difuzor'?p.kind.toLowerCase():null,p.size?p.size+' ml':null].filter(Boolean).join(' · ');}
 function toast(t){const e=h('div',{class:'toast',role:'status'},t);document.body.append(e);setTimeout(()=>e.remove(),2600);}
@@ -384,7 +389,7 @@ function go(k){tab=k;try{localStorage.setItem('vsp-tab',k);}catch(e){}$('#side')
 const ONLINE_MS=150000;let presOn=null,presStarted=false;
 function seenMs(u){const t=u&&u.lastSeen;return t&&t.toMillis?t.toMillis():t&&t.seconds?t.seconds*1000:0;}
 function isOnline(u){return Date.now()-seenMs(u)<ONLINE_MS;}
-function relSeen(u){const ms=seenMs(u);if(!ms)return 'niciodată';if(isOnline(u))return 'online';const m=Math.round((Date.now()-ms)/60000);if(m<60)return 'acum '+m+' min';const hh=Math.round(m/60);if(hh<24)return 'acum '+hh+' h';const d=new Date(ms);return d.toLocaleDateString('ro-RO',{day:'numeric',month:'short'})+', '+d.toLocaleTimeString('ro-RO',{hour:'2-digit',minute:'2-digit'});}
+function relSeen(u){const ms=seenMs(u);if(!ms)return 'niciodată';if(isOnline(u))return 'online';const m=Math.round((Date.now()-ms)/60000);if(m<60)return 'acum '+m+' min';const hh=Math.round(m/60);if(hh<24)return 'acum '+hh+' h';const d=new Date(ms);return dmy(d)+', '+d.toLocaleTimeString('ro-RO',{hour:'2-digit',minute:'2-digit'});}
 function renderPresence(){const el=$('#pres');if(!el||!window.VSAdmin||!me.id)return;const us=Object.values(VSAdmin.users()).filter(u=>u.id!==me.id&&u.active!==false&&(isAdmin||u.role==='admin')).sort((a,b)=>(isOnline(b)-isOnline(a))||(a.name||'').localeCompare(b.name||'','ro'));
 const on=new Set(us.filter(isOnline).map(u=>u.id));
 if(presOn&&isAdmin){us.filter(u=>on.has(u.id)&&!presOn.has(u.id)).forEach(u=>{toast((u.name||u.email)+' a intrat în aplicație');try{if(window.Notification&&Notification.permission==='granted'&&document.visibilityState!=='visible')new Notification('Vivid Senses Parteneri',{body:(u.name||u.email)+' a intrat în aplicație'});}catch(e){}});}
@@ -408,6 +413,22 @@ function kpiTips(root){const st=set();const sh=st.shareSite;const T=[
  [/^restant/i,()=>'Vânzări făcute până la data aleasă, dar încă neîncasate. Cota pe ele se plătește în luna în care clientul plătește.']];
  root.querySelectorAll('.kpi').forEach(k=>{const l=k.querySelector('.l');if(!l)return;const t=l.textContent.trim();const hit=T.find(([re])=>re.test(t));if(!hit)return;k.setAttribute('data-tip',hit[1]());k.tabIndex=0;});
  requestAnimationFrame(()=>root.querySelectorAll('.kpi[data-tip]').forEach(k=>{const r=k.getBoundingClientRect();k.classList.toggle('tr',r.left+r.width/2>innerWidth/2);}));}
+function dmy(d){return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();}
+// Câmpuri de dată afișate mereu zz/ll/aaaa (browserul le-ar arăta în formatul limbii lui). Valoarea internă rămâne AAAA-LL-ZZ.
+const _vDesc=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value');
+function enhanceDate(inp){if(inp._dd||!inp.parentNode)return;inp._dd=1;const isM=inp.type==='month';
+ const fmt=v=>!v?'':isM?v.slice(5,7)+'/'+v.slice(0,4):v.slice(8,10)+'/'+v.slice(5,7)+'/'+v.slice(0,4);
+ const parse=x=>{const m=isM?x.match(/^(\d{1,2})[./-](\d{4})$/):x.match(/^(\d{1,2})[./-](\d{1,2})[./-](\d{4})$/);if(!m)return null;const v=isM?m[2]+'-'+m[1].padStart(2,'0'):m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');return isNaN(new Date(v+(isM?'-01':'')+'T12:00:00'))?null:v;};
+ const t=document.createElement('input');t.type='text';t.inputMode='numeric';t.autocomplete='off';t.placeholder=isM?'ll/aaaa':'zz/ll/aaaa';t.disabled=inp.disabled;if(inp.style.cssText)t.style.cssText=inp.style.cssText;
+ Object.defineProperty(inp,'value',{configurable:true,get(){return _vDesc.get.call(inp);},set(v){_vDesc.set.call(inp,v);t.value=fmt(_vDesc.get.call(inp));}});
+ t.value=fmt(inp.value);
+ const w=document.createElement('span');w.className='dwrap';inp.parentNode.insertBefore(w,inp);w.append(t,inp);inp.classList.add('dpick');inp.tabIndex=-1;
+ const fire=()=>{inp.dispatchEvent(new Event('input',{bubbles:true}));inp.dispatchEvent(new Event('change',{bubbles:true}));};
+ t.addEventListener('input',()=>{const d=t.value.replace(/\D/g,'').slice(0,isM?6:8);let o=d;if(isM){if(d.length>2)o=d.slice(0,2)+'/'+d.slice(2);}else{if(d.length>4)o=d.slice(0,2)+'/'+d.slice(2,4)+'/'+d.slice(4);else if(d.length>2)o=d.slice(0,2)+'/'+d.slice(2);}t.value=o;});
+ t.addEventListener('change',()=>{const x=t.value.trim();if(!x){_vDesc.set.call(inp,'');fire();return;}const v=parse(x);if(v){_vDesc.set.call(inp,v);t.value=fmt(v);fire();}else{t.value=fmt(_vDesc.get.call(inp));toast(isM?'Scrie luna ca ll/aaaa, ex. 11/2026.':'Scrie data ca zz/ll/aaaa, ex. 07/11/2026.');}});
+ inp.addEventListener('change',()=>{t.value=fmt(_vDesc.get.call(inp));});inp.addEventListener('input',()=>{t.value=fmt(_vDesc.get.call(inp));});}
+function enhanceDates(root){(root||document).querySelectorAll('input[type=date],input[type=month]').forEach(enhanceDate);}
+new MutationObserver(ms=>{for(const m of ms)for(const n of m.addedNodes)if(n.nodeType===1){if(n.matches&&n.matches('input[type=date],input[type=month]'))enhanceDate(n);else if(n.querySelectorAll)enhanceDates(n);}}).observe(document.documentElement,{childList:true,subtree:true});
 function renderNav(){startPresence();const due=fuDue().length;const late=unpaid().filter(x=>payState(x).k==='late').length+(isAdmin?pendingSales().length:0);const badge={clienti:Object.keys(S.clients).length||null,mostre:due?[due,'hot']:null,vanzari:late?[late,'hot']:null};$('#nav').replaceChildren(...TABS.filter(([k])=>k!=='jurnal'||isAdmin).map(([k,l])=>k==='g'?h('div',{class:'sgrp'},l):h('button',{class:'nv','aria-current':tab===k?'page':null,onclick:()=>go(k)},h('span',{html:'<svg viewBox="0 0 24 24"><path d="'+IC[k]+'"/></svg>'}),l,badge[k]?h('span',{class:'bdg'+(Array.isArray(badge[k])?' hot':'')},Array.isArray(badge[k])?badge[k][0]:badge[k]):null)));$('#tt').textContent=TITLES[tab]||'Panou';const nb=$('#newb');const act={panou:['+ Vânzare',()=>saleModal()],clienti:['+ Client nou',()=>clientModal()],mostre:['+ Mostră',()=>sampleModal()],vanzari:['+ Vânzare',()=>saleModal()],produse:isAdmin?['+ Produs',()=>prodModal()]:null,stoc:['+ Intrare marfă',()=>moveModal()]}[tab];nb.hidden=!act;if(act){nb.textContent=act[0];nb.onclick=act[1];}const ex={vanzari:[['Excel',exportVanzari],['Decont PDF',printDecont]],clienti:[['Excel',exportClienti]],stoc:[['Excel',exportStoc]]}[tab]||[];$('#exps').replaceChildren(...ex.map(([l,f])=>h('button',{class:'b',onclick:f},l)));}
 function monthPicker(){return h('label',{class:'f',style:'max-width:180px'},'Luna',h('input',{type:'month',id:'month',value:month,onchange:e=>{month=e.target.value;render();}}));}
 let rq=false;function render(){if(rq)return;rq=true;requestAnimationFrame(()=>{rq=false;renderNav();const m=$('#main');const f={panou:vPanou,produse:vProduse,stoc:vStoc,vanzari:vVanzari,clienti:vClienti,mostre:vMostre,rapoarte:vRapoarte,jurnal:vJurnal,setari:vSetari}[tab]||vPanou;m.replaceChildren(...[].concat(f()).filter(x=>x!=null&&x!==false));kpiTips(m);m.querySelectorAll('.tw table').forEach(t=>{const hs=[...t.querySelectorAll('thead th')].map(th=>th.textContent.trim());t.querySelectorAll('tbody tr').forEach(tr=>[...tr.children].forEach((td,i)=>td.setAttribute('data-label',hs[i]||'')));});});}
@@ -606,13 +627,13 @@ modal([h('h2',null,'Dă o mostră'),h('div',{class:'fgrid'},h('label',{class:'f'
 
 // ---------- SETĂRI ----------
 function vSetari(){return [...vSetariBase(),vCont(),vUtilizatori()].filter(Boolean);}
-function vSetariBase(){const st=set();const f={},ft={};const inp=(k,lab,hint)=>{f[k]=h('input',{id:'st-'+k,type:'number',step:'0.1',value:st[k],disabled:!isAdmin});return h('label',{class:'f'},lab,f[k],hint?h('span',{class:'note'},hint):null);};const txt=(k,lab,hint)=>{ft[k]=h('input',{id:'st-'+k,value:st[k]||'',disabled:!isAdmin});return h('label',{class:'f'},lab,ft[k],hint?h('span',{class:'note'},hint):null);};
+function vSetariBase(){const st=set();const f={},ft={};const inp=(k,lab,hint)=>{f[k]=h('input',{id:'st-'+k,type:'number',step:'0.1',value:st[k],disabled:!isAdmin});return h('label',{class:'f'},lab,f[k],hint?h('span',{class:'note'},hint):null);};const txt=(k,lab,hint)=>{ft[k]=h('input',{id:'st-'+k,value:st[k]||'',disabled:!isAdmin});return h('label',{class:'f'},lab,ft[k],hint?h('span',{class:'note'},hint):null);};const dt=(k,lab,hint)=>{ft[k]=h('input',{id:'st-'+k,type:'date',value:st[k]||'',disabled:!isAdmin});return h('label',{class:'f'},lab,ft[k],hint?h('span',{class:'note'},hint):null);};
 return [h('div',null,h('div',{class:'eyebrow'},'Regulile calculului'),h('h1',null,'Setări'),h('p',{class:'sub'},isAdmin?'Le schimbi doar tu; partenerul le vede, ca să știe exact cum se calculează cota lui.':'Setările le modifică Alex. Le vezi aici ca să știi exact cum se calculează cota ta.')),
 h('div',{class:'panel'},h('h2',null,'Împărțirea profitului net'),h('div',{class:'fgrid',style:'margin-top:10px'},inp('shareSite','Comenzi de pe site, % partener'),inp('shareAgent','Comenzi aduse de agent, % partener'),isAdmin?inp('shareEmag','Comenzi eMAG, % partener'):null)),
 h('div',{class:'panel'},h('h2',null,'Taxe și costuri'),h('div',{class:'fgrid',style:'margin-top:10px'},inp('vat','TVA %'),inp('micro','Impozit micro %','din venitul fără TVA'),inp('divTax','Impozit dividende %','informativ'),inp('payFee','Comision plată card %','comenzi de pe site'),isAdmin?inp('emagFee','Comision eMAG %','la prețul cu TVA'):null,inp('sampleTarget','Ținta de mostre','buc.'),inp('payTerm','Termen de plată implicit','zile, la comenzile aduse de agent'),inp('payoutTax','Impozit reținut la plata cotei %','confirmă cota cu contabila'),inp('maxDisc','Discount maxim fără aprobare %','sub prețul de listă'),inp('siteShip','Cost mediu curier comandă site','lei; din el se scade transportul plătit de client'))),
-h('div',{class:'panel'},h('h2',null,'Pornirea parteneriatului'),h('div',{class:'fgrid',style:'margin-top:10px'},txt('partnerFrom','Parteneriatul începe la','AAAA-LL-ZZ. Gol = nu a început: cota partenerului e 0. Contează data vânzării.'))),
+h('div',{class:'panel'},h('h2',null,'Pornirea parteneriatului'),h('div',{class:'fgrid',style:'margin-top:10px'},dt('partnerFrom','Parteneriatul începe la','Gol = nu a început: cota partenerului e 0. Contează data vânzării.'))),
 h('div',{class:'panel'},h('h2',null,'Teren: reumpleri și ținte'),h('div',{class:'fgrid',style:'margin-top:10px'},inp('daysPer100','Zile de parfum la 100 ml','ex. 30 → difuzor 500 ml ≈ 150 zile'),inp('refillLead','Reminder reumplere cu','zile înainte'),inp('visitsWeek','Vizite pe săptămână','țintă'),inp('samplesMonth','Mostre pe lună','țintă'),inp('ordersMonth','Comenzi noi pe lună','țintă'),inp('postsMonth','Postări TikTok/FB pe lună','țintă'))),
-isAdmin?h('div',{class:'panel'},h('h2',null,'Oblio și Shopify'),h('div',{class:'fgrid',style:'margin-top:10px'},txt('oblioCif','CIF firmă în Oblio'),txt('oblioSeries','Serie facturi Oblio','ex. VS'),txt('oblioVat','Cota TVA în Oblio','numele din Oblio, ex. Normala'),inp('oblioStock','Scade stocul în Oblio','1 = da, 0 = nu'),txt('shopFrom','Importă comenzi Shopify de la','AAAA-LL-ZZ'))):null,
+isAdmin?h('div',{class:'panel'},h('h2',null,'Oblio și Shopify'),h('div',{class:'fgrid',style:'margin-top:10px'},txt('oblioCif','CIF firmă în Oblio'),txt('oblioSeries','Serie facturi Oblio','ex. VS'),txt('oblioVat','Cota TVA în Oblio','numele din Oblio, ex. Normala'),inp('oblioStock','Scade stocul în Oblio','1 = da, 0 = nu'),dt('shopFrom','Importă comenzi Shopify de la'))):null,
 isAdmin?h('div',{class:'row'},h('button',{class:'b pri',onclick:()=>{const d={...S.settings};for(const k of Object.keys(f))d[k]=n2(f[k].value);for(const k of Object.keys(ft))d[k]=ft[k].value.trim();guard(()=>db.doc('settings/main').set(d),'Setări salvate');}},'Salvează setările')):null,
 h('p',{class:'note'},'Cheltuielile cu mașina, combustibilul și mostrele le suportă Vivid Senses și nu se scad din cota partenerului.')];}
 
@@ -637,7 +658,7 @@ const human=a=>{let d=null;try{d=JSON.parse(a.data||'');}catch(e){}if(!d||typeof
  if(c==='settings')return 'setările de calcul';
  if(c==='users')return [P(d.name),d.role==='admin'?'administrator':d.role?'partener':'',d.active===false?'dezactivat':''].filter(Boolean).join(' · ')||'cont';
  return Object.keys(d).slice(0,6).join(', ');};
-return [head,rows.length?h('div',{class:'tw'},h('table',null,h('thead',null,h('tr',null,['Când','Cine','Ce','Unde','Detalii'].map(x=>h('th',null,x)))),h('tbody',null,rows.map(a=>{const d=a.ts&&a.ts.toDate?a.ts.toDate():null;return h('tr',null,h('td',null,d?d.toLocaleString('ro-RO',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'acum'),h('td',null,personName(a.by)),h('td',null,h('span',{class:'pill '+(a.action==='șters'?'bad':a.action==='adăugat'?'good':'')},a.action)),h('td',null,col(a.path)),h('td',{class:'wrapc jd',style:'max-width:520px;font-size:12.5px;color:var(--muted)'},human(a)));})))):h('div',{class:'panel empty'},'Nicio modificare încă.')];}
+return [head,rows.length?h('div',{class:'tw'},h('table',null,h('thead',null,h('tr',null,['Când','Cine','Ce','Unde','Detalii'].map(x=>h('th',null,x)))),h('tbody',null,rows.map(a=>{const d=a.ts&&a.ts.toDate?a.ts.toDate():null;return h('tr',null,h('td',null,d?dmy(d)+' '+d.toLocaleTimeString('ro-RO',{hour:'2-digit',minute:'2-digit'}):'acum'),h('td',null,personName(a.by)),h('td',null,h('span',{class:'pill '+(a.action==='șters'?'bad':a.action==='adăugat'?'good':'')},a.action)),h('td',null,col(a.path)),h('td',{class:'wrapc jd',style:'max-width:520px;font-size:12.5px;color:var(--muted)'},human(a)));})))):h('div',{class:'panel empty'},'Nicio modificare încă.')];}
 
 // ---------- CONT ȘI UTILIZATORI ----------
 let usersSnap=null,usersUnsub=null;
@@ -721,7 +742,7 @@ renderNav();
 })();
 })();
 </script>
-<script type="module" src="firebase-bridge.js?v=20261107p"></script>
+<script type="module" src="firebase-bridge.js?v=20261107q"></script>
 <script>if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
 </body>
 </html>

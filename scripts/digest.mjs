@@ -57,7 +57,7 @@ for (const s of samples) {
 }
 for (const c of clients) if (c.nextDate && c.nextDate <= today && c.stage !== 'pierdut' && c.stage !== 'client') tasks.push({ due: c.nextDate, who: c.by, text: `${c.name} · ${c.nextText || 'următorul pas'}` });
 // Încasări: scadente azi sau întârziate (le văd administratorul și cel care a făcut vânzarea)
-const fmtD = d => d.split('-').reverse().join('.');
+const fmtD = d => d.split('-').reverse().join('/');
 for (const s of [...sales, ...salesEmag]) {
   if (s.paid !== false) continue;
   const due = s.payDue || s.date;
