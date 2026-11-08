@@ -89,8 +89,9 @@ async function shopify() {
           // Prețul din aplicație se aliniază la Shopify doar când prețul se SCHIMBĂ în Shopify.
           // O modificare făcută manual în aplicație nu mai e suprascrisă la fiecare sincronizare.
           if (price > 0) {
-            if (ex.shopPrice == null) ch.shopPrice = price;
-            else if (Math.abs(price - n2(ex.shopPrice)) > 0.004) { ch.shopPrice = price; ch.price = price; }
+            const changed = ex.shopPrice == null ? Math.abs(price - n2(ex.price)) > 0.004 : Math.abs(price - n2(ex.shopPrice)) > 0.004;
+            if (ex.shopPrice == null || changed) ch.shopPrice = price;
+            if (changed) ch.price = price;
           }
           if (!ex.shop) ch.shop = key;
           if ((ex.active !== false) !== active) ch.active = active;
