@@ -86,7 +86,12 @@ async function shopify() {
         const ex = byShop[key] || (v.sku && bySku[String(v.sku).trim()]);
         if (ex) {
           const ch = {};
-          if (price > 0 && Math.abs(price - n2(ex.price)) > 0.004) ch.price = price;
+          // Prețul din aplicație se aliniază la Shopify doar când prețul se SCHIMBĂ în Shopify.
+          // O modificare făcută manual în aplicație nu mai e suprascrisă la fiecare sincronizare.
+          if (price > 0) {
+            if (ex.shopPrice == null) ch.shopPrice = price;
+            else if (Math.abs(price - n2(ex.shopPrice)) > 0.004) { ch.shopPrice = price; ch.price = price; }
+          }
           if (!ex.shop) ch.shop = key;
           if ((ex.active !== false) !== active) ch.active = active;
           if (Object.keys(ch).length) { await fs.doc('products/' + ex.id).update({ ...ch, updated: todayRO }); Object.assign(ex, ch); pUpd++; }
@@ -95,7 +100,7 @@ async function shopify() {
         const pt = parseTitle(pr.title, pr.handle, pr.vendor);
         const sz = (opt.match(/(\d+[.,]?\d*)\s*ml/i) || String(pr.title).match(/(\d+[.,]?\d*)\s*ml/i) || [])[1];
         const doc = { line: pt.line, name: pt.name + (opt && !/ml/i.test(opt) ? ' · ' + opt : ''), kind: pt.kind, size: sz ? n2(String(sz).replace(',', '.')) : null,
-          cost: 0, price, minStock: 0, sku: String(v.sku || '').trim(), shop: key, active, created: todayRO, updated: todayRO };
+          cost: 0, price, shopPrice: price, minStock: 0, sku: String(v.sku || '').trim(), shop: key, active, created: todayRO, updated: todayRO };
         const ref = await fs.collection('products').add(doc);
         const np = { id: ref.id, ...doc }; products.push(np); byShop[key] = np; if (np.sku) bySku[np.sku] = np;
         console.log('Produs nou din Shopify:', [doc.line, doc.name, doc.kind, doc.size ? doc.size + ' ml' : ''].filter(Boolean).join(' · '), '·', price, 'lei');
