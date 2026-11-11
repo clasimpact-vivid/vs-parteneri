@@ -120,14 +120,14 @@ async function shopify() {
     const key = (v.product && v.product.handle ? v.product.handle : '') + '|' + (/^default title$/i.test(opt) ? '' : opt);
     return byShop[key] || (li.sku && bySku[String(li.sku).trim()]) || null;
   };
-  // Numele clienților din Shopify: apel separat, opțional. Dacă lipsește permisiunea (read_customers / date protejate), sincronizarea continuă fără nume.
+  // Numele clienților din Shopify: apel separat, opțional. Dacă lipsește permisiunea (date protejate ale clienților), sincronizarea continuă fără nume.
   const names = {};
   try {
     let nAfter = null;
     do {
-      const nd = await gql(`query($q:String,$after:String){orders(first:100,after:$after,query:$q){pageInfo{hasNextPage endCursor}nodes{legacyResourceId customer{displayName} shippingAddress{name}}}}`, { q, after: nAfter });
+      const nd = await gql(`query($q:String,$after:String){orders(first:100,after:$after,query:$q){pageInfo{hasNextPage endCursor}nodes{legacyResourceId shippingAddress{name} billingAddress{name}}}}`, { q, after: nAfter });
       for (const o of nd.orders.nodes) {
-        const nm = ((o.customer && o.customer.displayName) || (o.shippingAddress && o.shippingAddress.name) || '').trim();
+        const nm = ((o.shippingAddress && o.shippingAddress.name) || (o.billingAddress && o.billingAddress.name) || '').trim();
         if (nm) names[o.legacyResourceId] = nm;
       }
       nAfter = nd.orders.pageInfo.hasNextPage ? nd.orders.pageInfo.endCursor : null;
