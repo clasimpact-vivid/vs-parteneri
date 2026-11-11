@@ -121,14 +121,15 @@ async function shopify() {
     return byShop[key] || (li.sku && bySku[String(li.sku).trim()]) || null;
   };
   // Numele clienților din Shopify: apel separat, opțional. Dacă lipsește permisiunea (date protejate ale clienților), sincronizarea continuă fără nume.
-  const names = {};
+  const names = {}, codIds = {};
   try {
     let nAfter = null;
     do {
-      const nd = await gql(`query($q:String,$after:String){orders(first:100,after:$after,query:$q){pageInfo{hasNextPage endCursor}nodes{legacyResourceId shippingAddress{name} billingAddress{name}}}}`, { q, after: nAfter });
+      const nd = await gql(`query($q:String,$after:String){orders(first:100,after:$after,query:$q){pageInfo{hasNextPage endCursor}nodes{legacyResourceId paymentGatewayNames shippingAddress{name} billingAddress{name}}}}`, { q, after: nAfter });
       for (const o of nd.orders.nodes) {
         const nm = ((o.shippingAddress && o.shippingAddress.name) || (o.billingAddress && o.billingAddress.name) || '').trim();
         if (nm) names[o.legacyResourceId] = nm;
+        if ((o.paymentGatewayNames || []).some(g => /cash|cod|ramburs|livrare|delivery/i.test(g))) codIds[o.legacyResourceId] = true;
       }
       nAfter = nd.orders.pageInfo.hasNextPage ? nd.orders.pageInfo.endCursor : null;
     } while (nAfter);
@@ -161,6 +162,8 @@ async function shopify() {
       const shopName = names[o.legacyResourceId] || old.shopName || null;
       // O încasare marcată manual în aplicație (ramburs) nu se mai dă înapoi când Shopify încă arată „Pending”.
       const keepPaid = !paid && old.paid === true;
+      // Ramburs (sau plată încă neprimită): nu există comision de card; taxa COD e deja în costul curierului din AWB.
+      const isCod = !!(codIds[o.legacyResourceId] || old.cod === true || (!paid && !keepPaid));
       // Transport: dacă clientul l-a plătit (comenzi sub pragul de livrare gratuită), firma suportă doar diferența până la costul curierului.
       const charged = n2(o.totalShippingPriceSet && o.totalShippingPriceSet.shopMoney.amount);
       const shipCost = Math.max(0, Math.round((n2(st.siteShip) - charged) * 100) / 100);
@@ -169,6 +172,7 @@ async function shopify() {
         by: 'shopify', loc: 'depozit', shopId: o.legacyResourceId, paid: paid || keepPaid,
         paidDate: paid ? (tx ? roDay(tx.processedAt) : date) : keepPaid ? (old.paidDate || date) : null, payDue: (paid || keepPaid) ? null : addDays(date, 7) };
       if (shopName) doc.shopName = shopName;
+      if (isCod) doc.cod = true;
       await ref.set(doc, { merge: true });
       n++;
       for (const rf of o.refunds || []) {
