@@ -120,6 +120,19 @@ async function shopify() {
     const key = (v.product && v.product.handle ? v.product.handle : '') + '|' + (/^default title$/i.test(opt) ? '' : opt);
     return byShop[key] || (li.sku && bySku[String(li.sku).trim()]) || null;
   };
+  // Numele clienților din Shopify: apel separat, opțional. Dacă lipsește permisiunea (read_customers / date protejate), sincronizarea continuă fără nume.
+  const names = {};
+  try {
+    let nAfter = null;
+    do {
+      const nd = await gql(`query($q:String,$after:String){orders(first:100,after:$after,query:$q){pageInfo{hasNextPage endCursor}nodes{legacyResourceId customer{displayName} shippingAddress{name}}}}`, { q, after: nAfter });
+      for (const o of nd.orders.nodes) {
+        const nm = ((o.customer && o.customer.displayName) || (o.shippingAddress && o.shippingAddress.name) || '').trim();
+        if (nm) names[o.legacyResourceId] = nm;
+      }
+      nAfter = nd.orders.pageInfo.hasNextPage ? nd.orders.pageInfo.endCursor : null;
+    } while (nAfter);
+  } catch (e) { console.log('Shopify: numele clienților nu sunt disponibile (', String(e.message).slice(0, 160), ') — continui fără nume.'); }
   let after = null, n = 0, warn = [];
   do {
     const d = await gql(Q, { q, after });
@@ -145,13 +158,17 @@ async function shopify() {
           unitCost: p ? (n2(oldCost[p.id]) || n2(p.cost)) : 0 });
       }
       const who = '';
+      const shopName = names[o.legacyResourceId] || old.shopName || null;
+      // O încasare marcată manual în aplicație (ramburs) nu se mai dă înapoi când Shopify încă arată „Pending”.
+      const keepPaid = !paid && old.paid === true;
       // Transport: dacă clientul l-a plătit (comenzi sub pragul de livrare gratuită), firma suportă doar diferența până la costul curierului.
       const charged = n2(o.totalShippingPriceSet && o.totalShippingPriceSet.shopMoney.amount);
       const shipCost = Math.max(0, Math.round((n2(st.siteShip) - charged) * 100) / 100);
       const doc = { date, channel: 'site', clientId: old.clientId || null, ship: old.shipManual ? old.ship : shipCost,
         note: `Shopify ${o.name}${who ? ' · ' + who : ''}`, lines: lines.map(l => Object.fromEntries(Object.entries(l).filter(([, v]) => v !== undefined))),
-        by: 'shopify', loc: 'depozit', shopId: o.legacyResourceId, paid,
-        paidDate: paid ? (tx ? roDay(tx.processedAt) : date) : null, payDue: paid ? null : addDays(date, 7) };
+        by: 'shopify', loc: 'depozit', shopId: o.legacyResourceId, paid: paid || keepPaid,
+        paidDate: paid ? (tx ? roDay(tx.processedAt) : date) : keepPaid ? (old.paidDate || date) : null, payDue: (paid || keepPaid) ? null : addDays(date, 7) };
+      if (shopName) doc.shopName = shopName;
       await ref.set(doc, { merge: true });
       n++;
       for (const rf of o.refunds || []) {
