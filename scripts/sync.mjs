@@ -164,10 +164,10 @@ async function shopify() {
       const keepPaid = !paid && old.paid === true;
       // Ramburs (sau plată încă neprimită): nu există comision de card; taxa COD e deja în costul curierului din AWB.
       const isCod = !!(codIds[o.legacyResourceId] || old.cod === true || (!paid && !keepPaid));
-      // Transport: dacă clientul l-a plătit (comenzi sub pragul de livrare gratuită), firma suportă doar diferența până la costul curierului.
+      // Transport: ce a plătit clientul (shipCharged) intră în încasare; costul curierului (siteShip) se scade separat.
       const charged = n2(o.totalShippingPriceSet && o.totalShippingPriceSet.shopMoney.amount);
-      const shipCost = Math.max(0, Math.round((n2(st.siteShip) - charged) * 100) / 100);
-      const doc = { date, channel: 'site', clientId: old.clientId || null, ship: old.shipManual ? old.ship : shipCost,
+      const shipCost = n2(st.siteShip);
+      const doc = { date, channel: 'site', clientId: old.clientId || null, ship: old.shipManual ? old.ship : shipCost, shipCharged: charged,
         note: `Shopify ${o.name}${who ? ' · ' + who : ''}`, lines: lines.map(l => Object.fromEntries(Object.entries(l).filter(([, v]) => v !== undefined))),
         by: 'shopify', loc: 'depozit', shopId: o.legacyResourceId, paid: paid || keepPaid,
         paidDate: paid ? (tx ? roDay(tx.processedAt) : date) : keepPaid ? (old.paidDate || date) : null, payDue: (paid || keepPaid) ? null : addDays(date, 7) };
