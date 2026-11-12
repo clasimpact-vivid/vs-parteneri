@@ -2,8 +2,8 @@ name: Sincronizare Shopify și Oblio
 
 on:
   schedule:
-    # la fiecare 30 de minute (GitHub poate întârzia rulările câteva minute)
-    - cron: "*/30 * * * *"
+    # la fiecare 10 minute (GitHub poate întârzia sau sări rulări când e aglomerat)
+    - cron: "*/10 * * * *"
   workflow_dispatch: {}
 
 concurrency:
