@@ -51,6 +51,7 @@ async function shopify() {
   };
   const Q = `query($q:String,$after:String){orders(first:40,after:$after,query:$q,sortKey:UPDATED_AT){pageInfo{hasNextPage endCursor}nodes{
     legacyResourceId name processedAt cancelledAt test displayFinancialStatus totalShippingPriceSet{shopMoney{amount}}
+    discountApplications(first:5){nodes{__typename ... on AutomaticDiscountApplication{title} ... on DiscountCodeApplication{code} ... on ManualDiscountApplication{title}}}
     lineItems(first:50){nodes{quantity title variantTitle sku
       discountedUnitPriceAfterAllDiscountsSet{shopMoney{amount}} originalUnitPriceSet{shopMoney{amount}}
       variant{selectedOptions{name value} product{handle}}}}
@@ -167,7 +168,7 @@ async function shopify() {
       // Transport: ce a plătit clientul (shipCharged) intră în încasare; costul curierului (siteShip) se scade separat.
       const charged = n2(o.totalShippingPriceSet && o.totalShippingPriceSet.shopMoney.amount);
       const shipCost = n2(st.siteShip);
-      const doc = { date, channel: 'site', clientId: old.clientId || null, ship: old.shipManual ? old.ship : shipCost, shipCharged: charged,
+      const doc = { date, channel: 'site', clientId: old.clientId || null, ship: old.shipManual ? old.ship : shipCost, shipCharged: charged, discounts: ((o.discountApplications && o.discountApplications.nodes) || []).map(d => String(d.title || d.code || '').trim()).filter(Boolean),
         note: `Shopify ${o.name}${who ? ' · ' + who : ''}`, lines: lines.map(l => Object.fromEntries(Object.entries(l).filter(([, v]) => v !== undefined))),
         by: 'shopify', loc: 'depozit', shopId: o.legacyResourceId, paid: paid || keepPaid,
         paidDate: paid ? (tx ? roDay(tx.processedAt) : date) : keepPaid ? (old.paidDate || date) : null, payDue: (paid || keepPaid) ? null : addDays(date, 7) };
