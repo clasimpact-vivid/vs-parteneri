@@ -171,7 +171,7 @@ async function shopify() {
         note: `Shopify ${o.name}${who ? ' · ' + who : ''}`, lines: lines.map(l => Object.fromEntries(Object.entries(l).filter(([, v]) => v !== undefined))),
         by: 'shopify', loc: 'depozit', shopId: o.legacyResourceId, paid: paid || keepPaid,
         paidDate: paid ? (tx ? roDay(tx.processedAt) : date) : keepPaid ? (old.paidDate || date) : null, payDue: (paid || keepPaid) ? null : addDays(date, 7) };
-      if (shopName) doc.shopName = shopName;
+      if (shopName) doc.shopName = shopName; if (o.name) doc.shopOrder = o.name;
       if (isCod) doc.cod = true;
       await ref.set(doc, { merge: true });
       n++;
