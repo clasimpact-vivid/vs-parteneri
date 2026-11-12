@@ -125,10 +125,10 @@ async function shopify() {
   try {
     let nAfter = null;
     do {
-      const nd = await gql(`query($q:String,$after:String){orders(first:100,after:$after,query:$q){pageInfo{hasNextPage endCursor}nodes{legacyResourceId paymentGatewayNames shippingAddress{name} billingAddress{name}}}}`, { q, after: nAfter });
+      const nd = await gql(`query($q:String,$after:String){orders(first:100,after:$after,query:$q){pageInfo{hasNextPage endCursor}nodes{legacyResourceId paymentGatewayNames email shippingAddress{name} billingAddress{name}}}}`, { q, after: nAfter });
       for (const o of nd.orders.nodes) {
-        const nm = ((o.shippingAddress && o.shippingAddress.name) || (o.billingAddress && o.billingAddress.name) || '').trim();
-        if (nm) names[o.legacyResourceId] = nm;
+        const nm = ((o.shippingAddress && o.shippingAddress.name) || (o.billingAddress && o.billingAddress.name) || o.email || '').trim();
+        if (nm) names[o.legacyResourceId] = nm; else console.log('Fără nume/email în Shopify: comanda', o.legacyResourceId);
         if ((o.paymentGatewayNames || []).some(g => /cash|cod|ramburs|livrare|delivery/i.test(g))) codIds[o.legacyResourceId] = true;
       }
       nAfter = nd.orders.pageInfo.hasNextPage ? nd.orders.pageInfo.endCursor : null;
