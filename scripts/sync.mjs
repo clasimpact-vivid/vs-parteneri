@@ -112,7 +112,7 @@ async function shopify() {
   } while (pAfter);
   console.log(`Shopify: ${pNew} produse noi, ${pUpd} actualizate (preț / stare).`);
 
-  const since = addDays(todayRO, -7);
+  const since = addDays(todayRO, -60);
   const q = `created_at:>=${st.shopFrom} updated_at:>=${since}`;
   const match = li => {
     const v = li.variant || {};
