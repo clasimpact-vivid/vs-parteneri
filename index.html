@@ -568,7 +568,7 @@ h('table',null,h('thead',null,h('tr',null,['Produs','Buc.','Preț/buc fără TVA
 note?h('p',null,note):null,h('p',null,'Persoană de contact: '+(who.name||me.name||'')+(who.email?' · '+who.email:'')+'.'),h('p',{style:'font-size:11px;color:#777'},'Prețurile includ TVA '+set().vat+'%. Ofertă fără caracter de factură.')].filter(Boolean));setTimeout(()=>window.print(),50);}
 
 // ---------- CALCULATOR DE CAMPANIE ----------
-let campD=15,campMin=30,campShipV=null,campQ='';
+let campD=10,campMin=30,campShipV=null,campQ='';
 function campUnit(p,d,ship){const st=set();const gross=n2(p.price)*(1-d/100);const net=gross/(1+st.vat/100);const fee=gross*st.payFee/100;const micro=net*st.micro/100;const np=net-n2(p.cost)-fee-ship-micro;return{gross,net,fee,micro,np};}
 function campMax(p,ship,minP){const st=set();const k=(1-st.micro/100)/(1+st.vat/100)-st.payFee/100;if(k<=0||n2(p.price)<=0)return 0;const g=(n2(p.cost)+ship+minP)/k;return Math.max(0,(1-g/n2(p.price))*100);}
 function vCampanii(){const st=set();const ship=campShipV==null?n2(st.siteShip):campShipV;
